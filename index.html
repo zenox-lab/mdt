@@ -65,6 +65,49 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.3);
             transform: scale(1.05);
         }
+        
+        /* --- NOVOS ESTILOS PARA GRÁFICO DONUT --- */
+        .donut-chart {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            /* --wins é definido inline via JS */
+            background: conic-gradient(
+                #16a34a /* green-600 */ var(--wins, 0deg), 
+                #e11d48 /* rose-600 */ var(--wins, 0deg) 360deg
+            );
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .donut-chart::before {
+            content: '';
+            position: absolute;
+            width: 60px; /* 80px - 20px de borda */
+            height: 60px;
+            /* Cor de fundo do CARD onde o gráfico está */
+            background: #f3f4f6; /* bg-gray-100 */
+            border-radius: 50%;
+        }
+        .dark .donut-chart::before {
+             /* Cor de fundo do CARD (dark) */
+             background: #374151; /* gray-700 */
+        }
+        .donut-chart-text {
+            position: relative;
+            z-index: 10;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 800; /* font-extrabold */
+        }
+        /* Estilo para botões de filtro de análise ativos */
+        .analysis-filter-btn.active {
+            background-color: #ffffff;
+            color: #2563eb;
+        }
+        .dark .analysis-filter-btn.active {
+            background-color: #374151; /* gray-700 */
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
@@ -168,24 +211,64 @@
                 <div class="relative h-64 md:h-96">
                     <canvas id="equityChart"></canvas>
                 </div>
+
+                <!-- NOVOS CARDS DE RESUMO (Patrimônio) -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-xl text-center">
+                        <p class="text-sm opacity-70 mb-2">Lucro Hoje</p>
+                        <p id="patrimonioToday" class="text-2xl font-black text-gray-700 dark:text-gray-300">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-xl text-center">
+                        <p class="text-sm opacity-70 mb-2">Lucro Semana</p>
+                        <p id="patrimonioWeek" class="text-2xl font-black text-gray-700 dark:text-gray-300">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-xl text-center">
+                        <p class="text-sm opacity-70 mb-2">Lucro Mês</p>
+                        <p id="patrimonioMonth" class="text-2xl font-black text-gray-700 dark:text-gray-300">R$ 0,00</p>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg text-white text-center">
+                        <p class="text-sm opacity-90 mb-2">Maior Lucro (Geral)</p>
+                        <p id="patrimonioBiggestGain" class="text-2xl font-black">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl shadow-lg text-white text-center">
+                        <p class="text-sm opacity-90 mb-2">Maior Perca (Geral)</p>
+                        <p id="patrimonioBiggestLoss" class="text-2xl font-black">R$ 0,00</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- ANÁLISE -->
         <section id="analise" class="tab-content hidden space-y-8">
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-2xl p-5">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-coins text-yellow-500"></i> Por Ativo (Lucro Total / Win Rate)</h3>
-                    <div id="analysisByAsset" class="space-y-3"></div>
-                </div>
-                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-2xl p-5">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrows-alt-h text-purple-500"></i> Por Tipo (Buy/Sell)</h3>
-                    <div id="analysisByType" class="space-y-3"></div>
-                </div>
+            
+            <!-- FILTROS DE ANÁLISE -->
+            <div class="flex justify-center mb-4">
+                <nav class="flex bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl shadow-lg overflow-hidden">
+                    <button data-filter="all" class="analysis-filter-btn active px-6 py-3 font-semibold text-gray-600 dark:text-gray-400">Geral</button>
+                    <button data-filter="month" class="analysis-filter-btn px-6 py-3 font-semibold text-gray-600 dark:text-gray-400">Mês</button>
+                    <button data-filter="week" class="analysis-filter-btn px-6 py-3 font-semibold text-gray-600 dark:text-gray-400">Semana</button>
+                    <button data-filter="day" class="analysis-filter-btn px-6 py-3 font-semibold text-gray-600 dark:text-gray-400">Dia</button>
+                </nav>
             </div>
-            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-2xl p-5">
+
+            <!-- Títulos fora dos grids e grids para os novos cards -->
+            <h3 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-coins text-yellow-500"></i> Desempenho por Ativo</h3>
+            <div id="analysisByAsset" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards de Ativo serão inseridos aqui pelo JS -->
+            </div>
+
+            <h3 class="text-xl font-bold flex items-center gap-2 mt-8"><i class="fas fa-arrows-alt-h text-purple-500"></i> Desempenho por Tipo (Buy/Sell)</h3>
+            <div id="analysisByType" class="grid md:grid-cols-2 gap-6">
+                 <!-- Cards de Tipo serão inseridos aqui pelo JS -->
+            </div>
+            
+            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-2xl shadow-2xl p-5 mt-8">
                 <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-search-dollar text-cyan-500"></i> Detalhado por Ativo</h3>
-                <div id="detailedAnalysis" class="space-y-4"></div>
+                <div id="detailedAnalysis" class="space-y-4">
+                    <!-- Análise detalhada (como estava) -->
+                </div>
             </div>
         </section>
     </div>
@@ -264,6 +347,7 @@
         let equityChartInstance = null;
         let currentEditingTradeId = null;
         let currentDate = new Date();
+        let currentAnalysisFilter = 'all'; // <-- NOVO ESTADO DO FILTRO
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
         // Elementos DOM (como no seu código)
@@ -296,7 +380,13 @@
             equityChart: document.getElementById('equityChart').getContext('2d'),
             analysisByAsset: document.getElementById('analysisByAsset'),
             analysisByType: document.getElementById('analysisByType'),
-            detailedAnalysis: document.getElementById('detailedAnalysis')
+            detailedAnalysis: document.getElementById('detailedAnalysis'),
+            // --- NOVOS ELEMENTOS (Request 3) ---
+            patrimonioToday: document.getElementById('patrimonioToday'),
+            patrimonioWeek: document.getElementById('patrimonioWeek'),
+            patrimonioMonth: document.getElementById('patrimonioMonth'),
+            patrimonioBiggestGain: document.getElementById('patrimonioBiggestGain'),
+            patrimonioBiggestLoss: document.getElementById('patrimonioBiggestLoss')
         };
 
         let currentEditingDate = null;
@@ -458,12 +548,14 @@
 
                 if (tradeDate === today) todayBal += amt;
 
+                // ATENÇÃO: A lógica de "Semana" aqui é para a semana do calendário (Início no Domingo)
                 if (tradeDate >= weekStartStr) {
                     weekBal += amt;
                     if (amt > 0 && amt > maxGain) maxGain = amt; // Apenas gains
                     if (amt < 0 && amt < maxLoss) maxLoss = amt; // Apenas losses
                 }
 
+                // ATENÇÃO: A lógica de "Mês" aqui é para o MÊS DO CALENDÁRIO VISTO
                 if (tradeDate.startsWith(`${currentYear}-${currentMonth}`)) monthBal += amt;
             });
 
@@ -574,32 +666,27 @@
                     datasets: [{
                         label: 'Patrimônio',
                         data: data,
-                        borderColor: '#3b82f6',
-                        backgroundColor: (ctx) => { // Gradiente de cor do seu layout
+                        borderColor: '#16a34a', // MUDANÇA: Linha verde
+                        backgroundColor: (ctx) => {
                             const chart = ctx.chart;
                             const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.height);
                             
-                            // --- INÍCIO DA CORREÇÃO ---
-                            // Garante que a altura do gráfico e o eixo Y são válidos
                             if (!chart.height || !isFinite(chart.height) || chart.height <= 0 || !chart.scales.y) {
-                                // Retorna uma cor sólida se o gráfico não estiver pronto
-                                return 'rgba(59, 130, 246, 0.1)';
+                                return 'rgba(34, 197, 94, 0.2)'; // <-- MUDANÇA: Verde (Request 2)
                             }
 
-                            const zeroY = chart.scales.y.getPixelForValue(initialEquity); // Baseado no início
+                            const zeroY = chart.scales.y.getPixelForValue(initialEquity);
                             
-                            // Garante que 'zeroY' é um número finito
                             if (!isFinite(zeroY)) {
-                                return 'rgba(59, 130, 246, 0.1)'; 
+                                return 'rgba(34, 197, 94, 0.2)'; // <-- MUDANÇA: Verde (Request 2)
                             }
 
-                            const ratio = Math.max(0, Math.min(1, zeroY / chart.height)); // Garante 0-1
-                            // --- FIM DA CORREÇÃO ---
+                            const ratio = Math.max(0, Math.min(1, zeroY / chart.height));
                             
-                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)'); // Azul claro (acima)
-                            gradient.addColorStop(ratio, 'rgba(59, 130, 246, 0.1)');
-                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.1)'); // Vermelho claro (abaixo)
-                            gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)');
+                            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.2)');    // <-- MUDANÇA: Verde (Request 2)
+                            gradient.addColorStop(ratio, 'rgba(34, 197, 94, 0.2)'); // <-- MUDANÇA: Verde (Request 2)
+                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.3)');  // <-- MUDANÇA: Vermelho Forte (Request 2)
+                            gradient.addColorStop(1, 'rgba(239, 68, 68, 0.3)');    // <-- MUDANÇA: Vermelho Forte (Request 2)
                             return gradient;
                         },
                         fill: true,
@@ -608,7 +695,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // <-- AJUSTE AQUI
+                    maintainAspectRatio: false, 
                     scales: {
                         y: {
                             beginAtZero: false,
@@ -631,25 +718,91 @@
         }
         els.updateEquityChart.onclick = updateEquityChart;
 
+        // --- NOVA FUNÇÃO PARA OS CARDS DO PATRIMÔNIO (Request 3) ---
+        function updatePatrimonioSummary() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Início do Domingo
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            
+            const monthStart = new Date();
+            monthStart.setDate(1); // Dia 1 do Mês Atual
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+
+            let todayBal = 0, weekBal = 0, monthBal = 0;
+            let maxGain = 0, maxLoss = 0; // Começa em 0
+
+            currentTrades.forEach(trade => {
+                const amt = parseFloat(trade.amount);
+                const tradeDate = trade.date;
+
+                // Cálculos de Período (baseado na data de HOJE)
+                if (tradeDate === today) todayBal += amt;
+                if (tradeDate >= weekStartStr) weekBal += amt;
+                if (tradeDate >= monthStartStr) monthBal += amt;
+
+                // Cálculos de Maior/Menor (Geral)
+                if (amt > maxGain) maxGain = amt;
+                if (amt < maxLoss) maxLoss = amt;
+            });
+
+            // Atualiza Hoje
+            els.patrimonioToday.textContent = `R$ ${todayBal.toFixed(2)}`;
+            els.patrimonioToday.className = todayBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
+
+            // Atualiza Semana
+            els.patrimonioWeek.textContent = `R$ ${weekBal.toFixed(2)}`;
+            els.patrimonioWeek.className = weekBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
+
+            // Atualiza Mês
+            els.patrimonioMonth.textContent = `R$ ${monthBal.toFixed(2)}`;
+            els.patrimonioMonth.className = monthBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
+            
+            // Atualiza Maior Lucro/Perca
+            els.patrimonioBiggestGain.textContent = `R$ ${maxGain.toFixed(2)}`;
+            els.patrimonioBiggestLoss.textContent = `R$ ${Math.abs(maxLoss).toFixed(2)}`;
+        }
+
+
         // --- Lógica de Análise (A VERSÃO DETALHADA) ---
         function updateAnalysis() {
+            // --- INÍCIO DA MUDANÇA: Filtro de Período (Request 1) ---
+            const today = new Date().toISOString().split('T')[0];
+            
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            
+            const monthStart = new Date();
+            monthStart.setDate(1);
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+
+            const filteredTrades = currentTrades.filter(trade => {
+                if (currentAnalysisFilter === 'all') return true;
+                if (currentAnalysisFilter === 'day') return trade.date === today;
+                if (currentAnalysisFilter === 'week') return trade.date >= weekStartStr;
+                if (currentAnalysisFilter === 'month') return trade.date >= monthStartStr;
+                return true;
+            });
+            // --- FIM DA MUDANÇA ---
+
             els.analysisByAsset.innerHTML = '';
             els.analysisByType.innerHTML = '';
-            els.detailedAnalysis.innerHTML = ''; // Limpa a nova secção
+            els.detailedAnalysis.innerHTML = ''; 
             
             const analysis = {
                 byAsset: {},
                 byType: {}
             };
             
-            // 1. Processa todos os trades
-            currentTrades.forEach(trade => {
+            // MUDANÇA: Usar 'filteredTrades' em vez de 'currentTrades'
+            filteredTrades.forEach(trade => {
                 const amount = parseFloat(trade.amount);
                 const asset = trade.asset || 'N/A';
-                const type = trade.type || 'N/A'; // 'Buy' or 'Sell'
+                const type = trade.type || 'N/A';
                 const contracts = parseInt(trade.contracts) || 1;
 
-                // --- Inicializa estruturas ---
                 if (!analysis.byAsset[asset]) {
                     analysis.byAsset[asset] = {
                         total: 0,
@@ -662,7 +815,6 @@
                     analysis.byType[type] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
                 }
 
-                // --- Agrega por Tipo (Geral) ---
                 if(type !== 'N/A') {
                     analysis.byType[type].total += amount;
                     analysis.byType[type].count++;
@@ -671,13 +823,11 @@
                     if (amount < 0) analysis.byType[type].losses++;
                 }
 
-                // --- Agrega por Ativo (Geral) ---
                 if(asset !== 'N/A') {
                     analysis.byAsset[asset].total += amount;
                     analysis.byAsset[asset].count++;
                 }
 
-                // --- Agrega por Ativo (Detalhado Buy/Sell) ---
                 const detailType = (type === 'Buy') ? 'buy' : (type === 'Sell' ? 'sell' : null);
                 
                 if (asset !== 'N/A' && detailType) {
@@ -691,27 +841,54 @@
 
             // --- 2. Renderização ---
 
-            // Helper: Resumo Geral (para Ativo e Tipo)
-            const renderSummaryRow = (label, data) => {
+            const renderAnalysisCard = (label, data) => {
                 const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
+                
                 const totalWins = (data.wins !== undefined) ? data.wins : data.buy.wins + data.sell.wins;
                 const totalLosses = (data.losses !== undefined) ? data.losses : data.buy.losses + data.sell.losses;
-                const totalCount = (data.count !== undefined) ? data.count : data.buy.count + data.sell.count;
+                const totalCount = totalWins + totalLosses;
                 const totalContracts = (data.contracts !== undefined) ? data.contracts : data.buy.contracts + data.sell.contracts;
-                const summaryWinRate = totalCount > 0 ? ((totalWins / totalCount) * 100).toFixed(0) : 0;
+                
+                const winRate = totalCount > 0 ? ((totalWins / totalCount) * 100) : 0;
+                const winDegrees = (winRate / 100) * 360;
 
                 return `
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700/60 rounded-lg flex justify-between items-center">
-                        <span class="font-semibold text-base">${label}</span>
-                        <div class="text-right">
-                            <span class="font-bold text-lg ${totalColor}">R$ ${data.total.toFixed(2)}</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">${totalWins} W / ${totalLosses} L (${summaryWinRate}%) | ${totalContracts} Contratos</p>
+                    <div class="p-4 bg-gray-100 dark:bg-gray-700/60 rounded-2xl shadow-lg flex items-center gap-4">
+                        <!-- Gráfico Donut -->
+                        <div class="flex-shrink-0">
+                            <div class="donut-chart" style="--wins: ${winDegrees.toFixed(0)}deg">
+                                <div class="donut-chart-text ${winRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                                    ${winRate.toFixed(0)}<span class="text-xs">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detalhes -->
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-lg">${label}</h4>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="font-bold text-xl ${totalColor}">R$ ${data.total.toFixed(2)}</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">${totalContracts} Contratos</span>
+                            </div>
+                            <div class="mt-2 space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">
+                                        <i class="fas fa-arrow-up text-green-500 mr-1"></i> Winners:
+                                    </span>
+                                    <span class="font-semibold">${totalWins}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">
+                                        <i class="fas fa-arrow-down text-red-500 mr-1"></i> Losers:
+                                    </span>
+                                    <span class="font-semibold">${totalLosses}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
             };
             
-            // Helper: Detalhe (Buy/Sell)
             const renderDetailRow = (label, data) => {
                 if (data.count === 0) {
                     return `
@@ -734,26 +911,24 @@
                 `;
             };
 
-            // Renderiza Resumo por Ativo
+            // MUDANÇA: Mensagem de "Sem dados" se o *filtro* estiver vazio
             if (Object.keys(analysis.byAsset).length === 0) {
-                 els.analysisByAsset.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados.</p>';
+                 els.analysisByAsset.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center col-span-full">Nenhum dado para este período.</p>`;
             } else {
                 Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
-                    els.analysisByAsset.innerHTML += renderSummaryRow(asset, data);
+                    els.analysisByAsset.innerHTML += renderAnalysisCard(asset, data);
                 });
             }
 
-            // Renderiza Resumo por Tipo
             if (Object.keys(analysis.byType).length === 0) {
-                 els.analysisByType.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados.</p>';
+                 els.analysisByType.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center col-span-full">Nenhum dado para este período.</p>`;
             } else {
                 Object.entries(analysis.byType).sort((a,b) => b[1].total - a[1].total).forEach(([type, data]) => {
-                    els.analysisByType.innerHTML += renderSummaryRow(type, data);
+                    els.analysisByType.innerHTML += renderAnalysisCard(type, data);
                 });
             }
             
-            // Renderiza Análise Detalhada
-            if (Object.keys(analysis.byAsset).length > 0) {
+            if (filteredTrades.length > 0 && Object.keys(analysis.byAsset).length > 0) {
                 Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
                     els.detailedAnalysis.innerHTML += `
                         <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
@@ -766,7 +941,7 @@
                     `;
                 });
             } else {
-                els.detailedAnalysis.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados para análise detalhada.</p>';
+                els.detailedAnalysis.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">Nenhum dado para este período.</p>`;
             }
         }
 
@@ -788,6 +963,26 @@
                 if (btn.dataset.tab === 'analise') updateAnalysis();
             });
         });
+
+        // --- NOVA LÓGICA: Filtro de Análise (Request 1) ---
+        document.querySelectorAll('.analysis-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Atualiza o estado
+                currentAnalysisFilter = btn.dataset.filter;
+
+                // Atualiza a UI dos botões
+                document.querySelectorAll('.analysis-filter-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-white', 'dark:bg-gray-700', 'text-blue-600');
+                    b.classList.add('text-gray-600', 'dark:text-gray-400');
+                });
+                btn.classList.add('active', 'bg-white', 'dark:bg-gray-700', 'text-blue-600');
+                btn.classList.remove('text-gray-600', 'dark:text-gray-400');
+
+                // Re-renderiza a análise
+                updateAnalysis();
+            });
+        });
+
 
         // --- Lógica de Tema ---
         const themeToggle = document.getElementById('themeToggle');
@@ -828,6 +1023,9 @@
                         currentTrades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                         renderCalendar(); // Renderiza o calendário com os dados
                         
+                        // --- NOVA CHAMADA (Request 3) ---
+                        updatePatrimonioSummary(); // Atualiza os novos cards
+
                         // Atualiza as abas ativas
                         if (!document.getElementById('patrimonio').classList.contains('hidden')) updateEquityChart();
                         if (!document.getElementById('analise').classList.contains('hidden')) updateAnalysis();
@@ -847,6 +1045,9 @@
 
         // Render inicial (para mostrar o calendário vazio antes dos dados chegarem)
         renderCalendar();
+        // Ativa o primeiro botão de filtro
+        document.querySelector('.analysis-filter-btn[data-filter="all"]').classList.add('active', 'bg-white', 'dark:bg-gray-700', 'text-blue-600');
+        document.querySelector('.analysis-filter-btn[data-filter="all"]').classList.remove('text-gray-600', 'dark:text-gray-400');
     </script>
 </body>
 </html>
