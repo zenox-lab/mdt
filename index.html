@@ -309,7 +309,6 @@
         // --- CONFIGURAÇÃO DO FIREBASE (PARA GITHUB) ---
         
         // ESTA É A SUA CONFIGURAÇÃO REAL DO FIREBASE
-        // (Corrigido para remover caracteres de espaço inválidos)
         const firebaseConfig = {
             apiKey: "AIzaSyDYXehc5ijr11GD029ph7-6a0oVy9ddcKY",
             authDomain: "meu-diario-de-trades.firebaseapp.com",
@@ -612,7 +611,7 @@
             const tradeType = tradeTypeInput.value;
             
             const tradeData = {
-                userId: userId,
+                userId: userId, // Continua guardando quem criou, por segurança
                 date: currentEditingDate,
                 amount: amount,
                 contracts: contracts, // Novo campo
@@ -908,10 +907,11 @@
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         console.log("Usuário autenticado:", user.uid);
-                        userId = user.uid;
+                        userId = user.uid; // Ainda guardamos o userId para o caso de querer saber *quem* criou
                         
-                        // Define o caminho da coleção (privado para o usuário)
-                        const collectionPath = `artifacts/${appId}/users/${userId}/operations`;
+                        // *** MUDANÇA IMPORTANTE (OPÇÃO A) ***
+                        // Define o caminho da coleção (PÚBLICO)
+                        const collectionPath = `artifacts/${appId}/public/data/operations`;
                         operationsCollection = collection(db, collectionPath);
                         
                         // Inicia o listener de dados
@@ -939,8 +939,10 @@
             
             console.log("Iniciando listener de dados em:", operationsCollection.path);
 
-            // Cria uma query para buscar apenas os dados do usuário logado
-            const q = query(operationsCollection, where("userId", "==", userId));
+            // *** MUDANÇA IMPORTANTE (OPÇÃO A) ***
+            // Cria uma query para buscar TODOS os dados da coleção pública
+            // Removemos o 'where("userId", "==", userId)'
+            const q = query(operationsCollection);
 
             // onSnapshot é o listener em tempo real
             onSnapshot(q, (snapshot) => {
