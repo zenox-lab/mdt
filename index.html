@@ -8,13 +8,63 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .day-box { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-size: 0.75rem; }
-        .value-box {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 60%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; border-radius: 0.5rem; border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(34,197,94,0.08); color: #166534;
+        /* Estilos do novo layout para o calendário */
+        .day-box { 
+            aspect-ratio: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            font-size: 0.75rem; 
         }
-        .value-box.loss { background: rgba(239,68,68,0.08); color: #991b1b; }
-        .has-trade::after { content: ''; position: absolute; top: 0.25rem; right: 0.25rem; width: 0.5rem; height: 0.5rem; background: linear-gradient(to bottom right, #10b981, #059669); border-radius: 50%; box-shadow: 0 0 0.25rem rgba(16,185,129,0.5); }
+        .value-box {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 80%; 
+            height: 60%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 0.8rem; 
+            border-radius: 0.5rem; 
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(34,197,94,0.08); 
+            color: #166534;
+        }
+        .dark .value-box {
+             border: 1px solid rgba(255,255,255,0.1);
+             background: rgba(34,197,94,0.1);
+             color: #6ee7b7;
+        }
+        .value-box.loss { 
+            background: rgba(239,68,68,0.08); 
+            color: #991b1b; 
+        }
+         .dark .value-box.loss { 
+            background: rgba(239,68,68,0.1); 
+            color: #fca5a5; 
+        }
+        .has-trade::after { 
+            content: ''; 
+            position: absolute; 
+            top: 0.25rem; 
+            right: 0.25rem; 
+            width: 0.5rem; 
+            height: 0.5rem; 
+            background: linear-gradient(to bottom right, #10b981, #059669); 
+            border-radius: 50%; 
+            box-shadow: 0 0 0.25rem rgba(16,185,129,0.5); 
+        }
+        /* Estilo para botões de rádio Buy/Sell no modal */
+        input[name="tradeType"]:checked + span {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
@@ -140,7 +190,8 @@
 
     <!-- MODAL -->
     <div id="tradeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg p-8 relative transform scale-95 transition-all duration-300">
+        <!-- Conteúdo do Modal -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg p-8 relative transform scale-95 transition-all duration-300" id="modalContent">
             <button id="closeModal" class="absolute top-4 right-6 text-3xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">&times;</button>
             <h3 class="text-2xl font-bold mb-6">Operações do Dia</h3>
             <div id="dailyTradesList" class="max-h-40 overflow-y-auto mb-6 border border-gray-200 dark:border-gray-700 rounded-lg py-2"></div>
@@ -170,8 +221,8 @@
                 <div>
                     <label class="block font-semibold mb-2">Tipo</label>
                     <div class="flex gap-4">
-                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Buy" checked class="sr-only"><span class="px-6 py-3 rounded-xl bg-green-500 text-white font-bold shadow-md hover:shadow-lg transition">Buy</span></label>
-                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Sell" class="sr-only"><span class="px-6 py-3 rounded-xl bg-red-500 text-white font-bold shadow-md hover:shadow-lg transition">Sell</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Buy" checked class="sr-only"><span class="px-6 py-3 rounded-xl bg-green-500 text-white font-bold shadow-md hover:shadow-lg transition-all duration-200">Buy</span></label>
+                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Sell" class="sr-only"><span class="px-6 py-3 rounded-xl bg-red-500 text-white font-bold shadow-md hover:shadow-lg transition-all duration-200">Sell</span></label>
                     </div>
                 </div>
                 <div>
@@ -191,7 +242,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDYXehc5ijr11GD029ph7-6a0oVy9ddcKY",
             authDomain: "meu-diario-de-trades.firebaseapp.com",
@@ -203,6 +256,7 @@
         };
         const appId = 'meu-diario-de-trades';
 
+        // Variáveis Globais
         let app, db, auth, userId, operationsCollection;
         let currentTrades = [];
         let equityChartInstance = null;
@@ -210,11 +264,12 @@
         let currentDate = new Date();
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-        // Elementos DOM
+        // Elementos DOM (como no seu código)
         const els = {
             currentMonthYear: document.getElementById('currentMonthYear'),
             calendarGrid: document.getElementById('calendarGrid'),
             tradeModal: document.getElementById('tradeModal'),
+            modalContent: document.getElementById('modalContent'), // Para animação de clique fora
             closeModal: document.getElementById('closeModal'),
             tradeForm: document.getElementById('tradeForm'),
             tradeAmount: document.getElementById('tradeAmount'),
@@ -244,6 +299,7 @@
 
         let currentEditingDate = null;
 
+        // --- Funções do Modal ---
         function openModal(date) {
             if (!date) return;
             currentEditingDate = date;
@@ -258,7 +314,7 @@
                     const contracts = trade.contracts || 1;
                     const amountColor = amount >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
                     els.dailyTradesList.innerHTML += `
-                        <div class="p-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition" data-trade-id="${trade.id}">
+                        <div class="p-3 mx-2 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition" data-trade-id="${trade.id}">
                             <div>
                                 <span class="font-bold ${amountColor}">R$ ${amount.toFixed(2)}</span>
                                 <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">(${contracts}c, ${assetLabel}/${typeLabel})</span>
@@ -274,7 +330,7 @@
                 els.dailyTradesList.innerHTML = '<p class="p-4 text-sm text-gray-400 dark:text-gray-500 text-center">Nenhuma operação neste dia.</p>';
             }
             els.tradeModal.classList.remove('hidden');
-            setTimeout(() => els.tradeModal.querySelector('div').classList.add('scale-100'), 10);
+            setTimeout(() => els.modalContent.classList.add('scale-100'), 10);
             els.tradeAmount.focus();
         }
 
@@ -306,13 +362,19 @@
         }
 
         function closeModal() {
-            els.tradeModal.classList.add('hidden');
-            currentEditingDate = null;
-            resetForm();
+            els.modalContent.classList.remove('scale-100');
+            setTimeout(() => {
+                els.tradeModal.classList.add('hidden');
+                currentEditingDate = null;
+                resetForm();
+            }, 300); // Espera a animação de scale-out
         }
         els.closeModal.onclick = closeModal;
-        els.tradeModal.addEventListener('click', (e) => { if (e.target === els.tradeModal) closeModal(); });
+        els.tradeModal.addEventListener('click', (e) => { 
+            if (e.target === els.tradeModal) closeModal(); 
+        });
 
+        // --- Funções do Calendário e Resumos ---
         function renderCalendar() {
             els.calendarGrid.innerHTML = '';
             const year = currentDate.getFullYear();
@@ -336,7 +398,7 @@
             // Dias em branco
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
-                emptyDay.className = 'day-box border-r border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50';
+                emptyDay.className = 'day-box bg-gray-50 dark:bg-gray-800/50 opacity-50';
                 els.calendarGrid.appendChild(emptyDay);
             }
 
@@ -347,7 +409,7 @@
                 let dayResult = dayTrades.reduce((acc, val) => acc + val, 0);
 
                 const dayEl = document.createElement('div');
-                dayEl.className = 'day-box border-r border-b border-gray-200 dark:border-gray-700 p-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all';
+                dayEl.className = 'day-box border border-gray-100 dark:border-gray-700/50 p-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all rounded-lg';
                 dayEl.dataset.date = dateString;
                 dayEl.innerHTML = `
                     <span class="absolute top-1 right-1 text-xs font-bold text-gray-500 dark:text-gray-400">${day}</span>
@@ -359,7 +421,7 @@
             }
 
             updateSummary(monthTrades);
-            updateBalances();
+            updateBalances(); // Atualiza os saldos
         }
 
         function updateSummary(monthTrades) {
@@ -368,7 +430,7 @@
             const total = monthTrades.length;
 
             els.netResult.textContent = `R$ ${totalResult.toFixed(2)}`;
-            els.netResult.className = totalResult >= 0 ? 'text-3xl font-black text-white' : 'text-3xl font-black text-white drop-shadow-md';
+            els.netResult.className = 'text-3xl font-black'; // A cor já vem do gradiente
 
             els.totalTrades.textContent = total;
 
@@ -396,8 +458,8 @@
 
                 if (tradeDate >= weekStartStr) {
                     weekBal += amt;
-                    if (amt > maxGain) maxGain = amt;
-                    if (amt < maxLoss) maxLoss = amt;
+                    if (amt > 0 && amt > maxGain) maxGain = amt; // Apenas gains
+                    if (amt < 0 && amt < maxLoss) maxLoss = amt; // Apenas losses
                 }
 
                 if (tradeDate.startsWith(`${currentYear}-${currentMonth}`)) monthBal += amt;
@@ -412,19 +474,21 @@
             els.monthBalance.textContent = `R$ ${monthBal.toFixed(2)}`;
             els.monthBalance.className = monthBal >= 0 ? 'text-3xl font-black text-purple-600' : 'text-3xl font-black text-red-600';
 
-            els.biggestGain.textContent = maxGain > -Infinity ? `R$ ${maxGain.toFixed(2)}` : 'R$ 0,00';
-            els.biggestLoss.textContent = maxLoss < Infinity ? `R$ ${Math.abs(maxLoss).toFixed(2)}` : 'R$ 0,00';
+            els.biggestGain.textContent = maxGain > 0 ? `R$ ${maxGain.toFixed(2)}` : 'R$ 0,00';
+            els.biggestLoss.textContent = maxLoss < 0 ? `R$ ${Math.abs(maxLoss).toFixed(2)}` : 'R$ 0,00';
         }
 
-        els.prevMonth.onclick = () => {
+        // Navegação do Calendário
+        document.getElementById('prevMonth').onclick = () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
             renderCalendar();
         };
-        els.nextMonth.onclick = () => {
+        document.getElementById('nextMonth').onclick = () => {
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar();
         };
 
+        // --- Lógica do Formulário (Salvar/Editar) ---
         els.tradeForm.onsubmit = async (e) => {
             e.preventDefault();
             const amount = parseFloat(els.tradeAmount.value);
@@ -432,7 +496,7 @@
             const tradeTypeInput = document.querySelector('input[name="tradeType"]:checked');
 
             if (isNaN(amount) || !tradeTypeInput || !els.tradeAsset.value) {
-                alert('Preencha todos os campos obrigatórios!');
+                console.warn('Preencha todos os campos obrigatórios!'); // Substituímos o alert
                 return;
             }
 
@@ -458,7 +522,7 @@
                 openModal(currentEditingDate);
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                alert('Erro ao salvar. Tente novamente.');
+                console.warn('Erro ao salvar. Tente novamente.'); // Substituímos o alert
             }
         };
 
@@ -470,10 +534,11 @@
                 openModal(currentEditingDate);
             } catch (error) {
                 console.error("Erro ao deletar:", error);
-                alert('Erro ao deletar.');
+                console.warn('Erro ao deletar.'); // Substituímos o alert
             }
         };
 
+        // --- Lógica do Gráfico de Patrimônio ---
         function updateEquityChart() {
             const initialEquity = parseFloat(els.initialEquity.value) || 0;
             const sortedTrades = [...currentTrades].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -508,14 +573,15 @@
                         label: 'Patrimônio',
                         data: data,
                         borderColor: '#3b82f6',
-                        backgroundColor: (ctx) => {
+                        backgroundColor: (ctx) => { // Gradiente de cor do seu layout
                             const chart = ctx.chart;
                             const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.height);
-                            const zeroY = chart.scales.y.getPixelForValue(0);
-                            const ratio = zeroY / chart.height;
-                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)');
+                            const zeroY = chart.scales.y.getPixelForValue(initialEquity); // Baseado no início
+                            const ratio = Math.max(0, Math.min(1, zeroY / chart.height)); // Garante 0-1
+                            
+                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)'); // Azul claro (acima)
                             gradient.addColorStop(ratio, 'rgba(59, 130, 246, 0.1)');
-                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.1)');
+                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.1)'); // Vermelho claro (abaixo)
                             gradient.addColorStop(1, 'rgba(239, 68, 68, 0.1)');
                             return gradient;
                         },
@@ -547,63 +613,143 @@
         }
         els.updateEquityChart.onclick = updateEquityChart;
 
+        // --- Lógica de Análise (A VERSÃO DETALHADA) ---
         function updateAnalysis() {
-            const analysis = { byAsset: {}, byType: { Buy: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 }, Sell: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 } } };
-
+            els.analysisByAsset.innerHTML = '';
+            els.analysisByType.innerHTML = '';
+            els.detailedAnalysis.innerHTML = ''; // Limpa a nova secção
+            
+            const analysis = {
+                byAsset: {},
+                byType: {}
+            };
+            
+            // 1. Processa todos os trades
             currentTrades.forEach(trade => {
                 const amount = parseFloat(trade.amount);
-                const asset = trade.asset || 'Outro';
-                const type = trade.type || 'Buy';
+                const asset = trade.asset || 'N/A';
+                const type = trade.type || 'N/A'; // 'Buy' or 'Sell'
                 const contracts = parseInt(trade.contracts) || 1;
 
+                // --- Inicializa estruturas ---
                 if (!analysis.byAsset[asset]) {
-                    analysis.byAsset[asset] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
+                    analysis.byAsset[asset] = {
+                        total: 0,
+                        count: 0,
+                        buy: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 },
+                        sell: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 }
+                    };
                 }
-                analysis.byAsset[asset].total += amount;
-                analysis.byAsset[asset].count++;
-                analysis.byAsset[asset].contracts += contracts;
-                if (amount > 0) analysis.byAsset[asset].wins++;
-                if (amount < 0) analysis.byAsset[asset].losses++;
+                if (!analysis.byType[type]) {
+                    analysis.byType[type] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
+                }
 
+                // --- Agrega por Tipo (Geral) ---
                 analysis.byType[type].total += amount;
                 analysis.byType[type].count++;
                 analysis.byType[type].contracts += contracts;
                 if (amount > 0) analysis.byType[type].wins++;
                 if (amount < 0) analysis.byType[type].losses++;
+
+                // --- Agrega por Ativo (Geral) ---
+                analysis.byAsset[asset].total += amount;
+                analysis.byAsset[asset].count++;
+
+                // --- Agrega por Ativo (Detalhado Buy/Sell) ---
+                const detailType = (type === 'Buy') ? 'buy' : (type === 'Sell' ? 'sell' : null);
+                
+                if (detailType) {
+                    analysis.byAsset[asset][detailType].total += amount;
+                    analysis.byAsset[asset][detailType].count++;
+                    analysis.byAsset[asset][detailType].contracts += contracts;
+                    if (amount > 0) analysis.byAsset[asset][detailType].wins++;
+                    if (amount < 0) analysis.byAsset[asset][detailType].losses++;
+                }
             });
 
+            // --- 2. Renderização ---
+
+            // Helper: Resumo Geral (para Ativo e Tipo)
             const renderSummaryRow = (label, data) => {
                 const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
-                const winRate = data.count > 0 ? ((data.wins / data.count) * 100).toFixed(0) : 0;
+                const totalWins = (data.wins !== undefined) ? data.wins : data.buy.wins + data.sell.wins;
+                const totalLosses = (data.losses !== undefined) ? data.losses : data.buy.losses + data.sell.losses;
+                const totalCount = (data.count !== undefined) ? data.count : data.buy.count + data.sell.count;
+                const totalContracts = (data.contracts !== undefined) ? data.contracts : data.buy.contracts + data.sell.contracts;
+                const summaryWinRate = totalCount > 0 ? ((totalWins / totalCount) * 100).toFixed(0) : 0;
+
                 return `
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg flex justify-between items-center">
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700/60 rounded-lg flex justify-between items-center">
                         <span class="font-semibold text-base">${label}</span>
                         <div class="text-right">
                             <span class="font-bold text-lg ${totalColor}">R$ ${data.total.toFixed(2)}</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${totalWins} W / ${totalLosses} L (${summaryWinRate}%) | ${totalContracts} Contratos</p>
                         </div>
                     </div>
                 `;
             };
-
-            els.analysisByAsset.innerHTML = Object.keys(analysis.byAsset).length > 0 
-                ? Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).map(([asset, data]) => renderSummaryRow(asset, data)).join('')
-                : '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados.</p>';
-
-            els.analysisByType.innerHTML = Object.entries(analysis.byType).map(([type, data]) => renderSummaryRow(type, data)).join('');
-
-            // Detalhado (simplificado para por ativo com buy/sell)
-            els.detailedAnalysis.innerHTML = Object.keys(analysis.byAsset).length > 0 
-                ? Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).map(([asset, data]) => `
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
-                        <h4 class="text-lg font-semibold mb-3">${asset} - Total R$ ${data.total.toFixed(2)}</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Win Rate: ${data.count > 0 ? ((data.wins / data.count) * 100).toFixed(0) : 0}% | Contratos: ${data.contracts}</p>
+            
+            // Helper: Detalhe (Buy/Sell)
+            const renderDetailRow = (label, data) => {
+                if (data.count === 0) {
+                    return `
+                        <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded">
+                            <span class="font-semibold">${label}</span>
+                            <span class="text-xs text-gray-400">Nenhum trade</span>
+                        </div>
+                    `;
+                }
+                const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
+                const winRate = (data.wins / data.count * 100).toFixed(0);
+                return `
+                    <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/30 rounded">
+                        <div>
+                            <span class="font-semibold">${label}</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
+                        </div>
+                        <span class="font-bold ${totalColor}">R$ ${data.total.toFixed(2)}</span>
                     </div>
-                `).join('')
-                : '<p class="text-gray-500 dark:text-gray-400">Sem dados para análise detalhada.</p>';
+                `;
+            };
+
+            // Renderiza Resumo por Ativo
+            if (Object.keys(analysis.byAsset).length === 0) {
+                 els.analysisByAsset.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados.</p>';
+            } else {
+                Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
+                    els.analysisByAsset.innerHTML += renderSummaryRow(asset, data);
+                });
+            }
+
+            // Renderiza Resumo por Tipo
+            if (Object.keys(analysis.byType).length === 0) {
+                 els.analysisByType.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados.</p>';
+            } else {
+                Object.entries(analysis.byType).sort((a,b) => b[1].total - a[1].total).forEach(([type, data]) => {
+                    els.analysisByType.innerHTML += renderSummaryRow(type, data);
+                });
+            }
+            
+            // Renderiza Análise Detalhada
+            if (Object.keys(analysis.byAsset).length > 0) {
+                Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
+                    els.detailedAnalysis.innerHTML += `
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
+                            <h4 class="text-lg font-semibold mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">${asset}</h4>
+                            <div class="space-y-2">
+                                ${renderDetailRow('Buy', data.buy)}
+                                ${renderDetailRow('Sell', data.sell)}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                els.detailedAnalysis.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center">Sem dados para análise detalhada.</p>';
+            }
         }
 
-        // Abas
+
+        // --- Lógica de Abas ---
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => {
@@ -621,7 +767,7 @@
             });
         });
 
-        // Tema
+        // --- Lógica de Tema ---
         const themeToggle = document.getElementById('themeToggle');
         const sunIcon = document.getElementById('sun');
         const moonIcon = document.getElementById('moon');
@@ -643,29 +789,39 @@
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) setMode(true);
 
-        // Inicialização Firebase (seu código original)
+        // --- Inicialização Firebase ---
         app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         auth = getAuth(app);
+        getAnalytics(app); // Inicializa o Analytics
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
                 const collectionPath = `artifacts/${appId}/public/data/operations`;
                 operationsCollection = collection(db, collectionPath);
+                
                 onSnapshot(query(operationsCollection), (snapshot) => {
                     currentTrades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderCalendar();
+                    renderCalendar(); // Renderiza o calendário com os dados
+                    
+                    // Atualiza as abas ativas
                     if (!document.getElementById('patrimonio').classList.contains('hidden')) updateEquityChart();
                     if (!document.getElementById('analise').classList.contains('hidden')) updateAnalysis();
+                }, (error) => {
+                     console.error("Erro ao buscar dados (onSnapshot):", error);
                 });
+
             } else {
-                signInAnonymously(auth);
+                signInAnonymously(auth).catch(error => {
+                    console.error("Erro no login anônimo:", error);
+                });
             }
         });
 
-        // Render inicial
+        // Render inicial (para mostrar o calendário vazio antes dos dados chegarem)
         renderCalendar();
     </script>
 </body>
 </html>
+
