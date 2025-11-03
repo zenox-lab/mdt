@@ -309,14 +309,15 @@
         // --- CONFIGURAÇÃO DO FIREBASE (PARA GITHUB) ---
         
         // ESTA É A SUA CONFIGURAÇÃO REAL DO FIREBASE
+        // (Corrigido para remover caracteres de espaço inválidos)
         const firebaseConfig = {
-          apiKey: "AIzaSyDYXehc5ijr11GD029ph7-6a0oVy9ddcKY",
-          authDomain: "meu-diario-de-trades.firebaseapp.com",
-          projectId: "meu-diario-de-trades",
-          storageBucket: "meu-diario-de-trades.firebasestorage.app",
-          messagingSenderId: "744192474673",
-          appId: "1:744192474673:web:c5adf1d9526b81deed1f10",
-          measurementId: "G-LM9V31W7BE"
+            apiKey: "AIzaSyDYXehc5ijr11GD029ph7-6a0oVy9ddcKY",
+            authDomain: "meu-diario-de-trades.firebaseapp.com",
+            projectId: "meu-diario-de-trades",
+            storageBucket: "meu-diario-de-trades.firebasestorage.app",
+            messagingSenderId: "744192474673",
+            appId: "1:744192474673:web:c5adf1d9526b81deed1f10",
+            measurementId: "G-LM9V31W7BE"
         };
         
         // O 'appId' é usado para criar o caminho do banco de dados
@@ -891,7 +892,7 @@
         }
 
         // --- INICIALIZAÇÃO DO APP (Firebase) ---
-        functioninitializeAppFlow() {
+        function initializeAppFlow() {
             try {
                 console.log("Iniciando Firebase...");
                 app = initializeApp(firebaseConfig);
