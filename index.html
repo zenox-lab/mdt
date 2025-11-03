@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-M-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Diário de Trades</title>
     <!-- Tailwind CSS -->
@@ -203,20 +203,30 @@
             <div id="analise" class="tab-content hidden">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 md:p-6">
                     <h2 class="text-xl font-semibold mb-4">Análise de Performance</h2>
+                    
+                    <!-- Resumos de Alto Nível -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Análise por Ativo -->
                         <div>
-                            <h3 class="text-lg font-semibold mb-3">Resultado por Ativo</h3>
+                            <h3 class="text-lg font-semibold mb-3">Resultado Geral por Ativo</h3>
                             <div id="analysisByAsset" class="space-y-2">
                                 <!-- Conteúdo gerado por JS -->
                             </div>
                         </div>
                         <!-- Análise por Tipo (Buy/Sell) -->
                         <div>
-                            <h3 class="text-lg font-semibold mb-3">Resultado por Tipo</h3>
+                            <h3 class="text-lg font-semibold mb-3">Resultado Geral por Tipo</h3>
                             <div id="analysisByType" class="space-y-2">
                                 <!-- Conteúdo gerado por JS -->
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Análise Detalhada -->
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold mb-4 border-t border-gray-200 dark:border-gray-700 pt-6">Desempenho Detalhado por Ativo</h3>
+                        <div id="detailedAnalysis" class="space-y-4">
+                            <!-- Conteúdo gerado por JS -->
                         </div>
                     </div>
                 </div>
@@ -361,6 +371,7 @@
         // Análise
         const analysisByAssetEl = document.getElementById('analysisByAsset');
         const analysisByTypeEl = document.getElementById('analysisByType');
+        const detailedAnalysisEl = document.getElementById('detailedAnalysis'); // NOVO
 
         // Navegação
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -765,46 +776,83 @@
         function updateAnalysis() {
             analysisByAssetEl.innerHTML = '';
             analysisByTypeEl.innerHTML = '';
+            detailedAnalysisEl.innerHTML = ''; // Limpa a nova secção
             
             const analysis = {
                 byAsset: {},
                 byType: {}
             };
             
-            // Processa todos os trades
+            // 1. Processa todos os trades
             currentTrades.forEach(trade => {
                 const amount = parseFloat(trade.amount);
                 const asset = trade.asset || 'N/A';
-                const type = trade.type || 'N/A';
+                const type = trade.type || 'N/A'; // 'Buy' or 'Sell'
                 const contracts = parseInt(trade.contracts) || 1;
 
-                // --- Por Ativo ---
+                // --- Inicializa estruturas ---
                 if (!analysis.byAsset[asset]) {
-                    analysis.byAsset[asset] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
+                    analysis.byAsset[asset] = {
+                        total: 0,
+                        count: 0,
+                        buy: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 },
+                        sell: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 }
+                    };
                 }
-                analysis.byAsset[asset].total += amount;
-                analysis.byAsset[asset].count++;
-                analysis.byAsset[asset].contracts += contracts;
-                if (amount > 0) analysis.byAsset[asset].wins++;
-                if (amount < 0) analysis.byAsset[asset].losses++;
-                
-                // --- Por Tipo ---
                 if (!analysis.byType[type]) {
                     analysis.byType[type] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
                 }
+
+                // --- Agrega por Tipo (Geral) ---
                 analysis.byType[type].total += amount;
                 analysis.byType[type].count++;
                 analysis.byType[type].contracts += contracts;
                 if (amount > 0) analysis.byType[type].wins++;
                 if (amount < 0) analysis.byType[type].losses++;
+
+                // --- Agrega por Ativo (Geral) ---
+                analysis.byAsset[asset].total += amount;
+                analysis.byAsset[asset].count++;
+
+                // --- Agrega por Ativo (Detalhado Buy/Sell) ---
+                const detailType = (type === 'Buy') ? 'buy' : (type === 'Sell' ? 'sell' : null);
+                
+                if (detailType) {
+                    analysis.byAsset[asset][detailType].total += amount;
+                    analysis.byAsset[asset][detailType].count++;
+                    analysis.byAsset[asset][detailType].contracts += contracts;
+                    if (amount > 0) analysis.byAsset[asset][detailType].wins++;
+                    if (amount < 0) analysis.byAsset[asset][detailType].losses++;
+                }
             });
 
-            // Função helper para renderizar a linha de análise
-            const renderAnalysisRow = (label, data) => {
+            // --- 2. Renderização ---
+
+            // Helper: Resumo Geral por Ativo
+            const renderSummaryRow = (label, data) => {
+                const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
+                const totalWins = data.buy.wins + data.sell.wins;
+                const totalLosses = data.buy.losses + data.sell.losses;
+                const totalContracts = data.buy.contracts + data.sell.contracts;
+                const summaryWinRate = data.count > 0 ? ((totalWins / data.count) * 100).toFixed(0) : 0;
+
+                return `
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg flex justify-between items-center">
+                        <span class="font-semibold text-base">${label}</span>
+                        <div class="text-right">
+                            <span class="font-bold text-lg ${totalColor}">R$ ${data.total.toFixed(2)}</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${totalWins} W / ${totalLosses} L (${summaryWinRate}%) | ${totalContracts} Contratos</p>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Helper: Resumo Geral por Tipo
+            const renderTypeRow = (label, data) => {
                 const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
                 const winRate = data.count > 0 ? (data.wins / data.count * 100).toFixed(0) : 0;
                 return `
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg flex justify-between items-center">
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg flex justify-between items-center">
                         <span class="font-semibold text-base">${label}</span>
                         <div class="text-right">
                             <span class="font-bold text-lg ${totalColor}">R$ ${data.total.toFixed(2)}</span>
@@ -813,24 +861,66 @@
                     </div>
                 `;
             };
+            
+            // Helper: Detalhe (Buy/Sell)
+            const renderDetailRow = (label, data) => {
+                if (data.count === 0) {
+                    return `
+                        <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                            <span class="font-semibold">${label}</span>
+                            <span class="text-xs text-gray-400">Nenhum trade</span>
+                        </div>
+                    `;
+                }
+                const totalColor = data.total >= 0 ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
+                const winRate = (data.wins / data.count * 100).toFixed(0);
+                return `
+                    <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                        <div>
+                            <span class="font-semibold">${label}</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
+                        </div>
+                        <span class="font-bold ${totalColor}">R$ ${data.total.toFixed(2)}</span>
+                    </div>
+                `;
+            };
 
-            // Renderiza
+            // Renderiza Resumo por Ativo
             if (Object.keys(analysis.byAsset).length === 0) {
                  analysisByAssetEl.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Sem dados.</p>';
             } else {
                 Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
-                    analysisByAssetEl.innerHTML += renderAnalysisRow(asset, data);
+                    analysisByAssetEl.innerHTML += renderSummaryRow(asset, data);
                 });
             }
 
+            // Renderiza Resumo por Tipo
             if (Object.keys(analysis.byType).length === 0) {
                  analysisByTypeEl.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Sem dados.</p>';
             } else {
                 Object.entries(analysis.byType).sort((a,b) => b[1].total - a[1].total).forEach(([type, data]) => {
-                    analysisByTypeEl.innerHTML += renderAnalysisRow(type, data);
+                    analysisByTypeEl.innerHTML += renderTypeRow(type, data);
                 });
             }
+            
+            // Renderiza Análise Detalhada
+            if (Object.keys(analysis.byAsset).length > 0) {
+                Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
+                    detailedAnalysisEl.innerHTML += `
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
+                            <h4 class="text-lg font-semibold mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">${asset}</h4>
+                            <div class="space-y-2">
+                                ${renderDetailRow('Buy', data.buy)}
+                                ${renderDetailRow('Sell', data.sell)}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                detailedAnalysisEl.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Sem dados para análise detalhada.</p>';
+            }
         }
+        
         
         // --- Lógica de Navegação por Abas ---
         tabBtns.forEach(btn => {
