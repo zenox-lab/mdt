@@ -576,8 +576,23 @@
                         backgroundColor: (ctx) => { // Gradiente de cor do seu layout
                             const chart = ctx.chart;
                             const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.height);
+                            
+                            // --- INÍCIO DA CORREÇÃO ---
+                            // Garante que a altura do gráfico e o eixo Y são válidos
+                            if (!chart.height || !isFinite(chart.height) || chart.height <= 0 || !chart.scales.y) {
+                                // Retorna uma cor sólida se o gráfico não estiver pronto
+                                return 'rgba(59, 130, 246, 0.1)';
+                            }
+
                             const zeroY = chart.scales.y.getPixelForValue(initialEquity); // Baseado no início
+                            
+                            // Garante que 'zeroY' é um número finito
+                            if (!isFinite(zeroY)) {
+                                return 'rgba(59, 130, 246, 0.1)'; 
+                            }
+
                             const ratio = Math.max(0, Math.min(1, zeroY / chart.height)); // Garante 0-1
+                            // --- FIM DA CORREÇÃO ---
                             
                             gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)'); // Azul claro (acima)
                             gradient.addColorStop(ratio, 'rgba(59, 130, 246, 0.1)');
@@ -645,20 +660,24 @@
                 }
 
                 // --- Agrega por Tipo (Geral) ---
-                analysis.byType[type].total += amount;
-                analysis.byType[type].count++;
-                analysis.byType[type].contracts += contracts;
-                if (amount > 0) analysis.byType[type].wins++;
-                if (amount < 0) analysis.byType[type].losses++;
+                if(type !== 'N/A') {
+                    analysis.byType[type].total += amount;
+                    analysis.byType[type].count++;
+                    analysis.byType[type].contracts += contracts;
+                    if (amount > 0) analysis.byType[type].wins++;
+                    if (amount < 0) analysis.byType[type].losses++;
+                }
 
                 // --- Agrega por Ativo (Geral) ---
-                analysis.byAsset[asset].total += amount;
-                analysis.byAsset[asset].count++;
+                if(asset !== 'N/A') {
+                    analysis.byAsset[asset].total += amount;
+                    analysis.byAsset[asset].count++;
+                }
 
                 // --- Agrega por Ativo (Detalhado Buy/Sell) ---
                 const detailType = (type === 'Buy') ? 'buy' : (type === 'Sell' ? 'sell' : null);
                 
-                if (detailType) {
+                if (asset !== 'N/A' && detailType) {
                     analysis.byAsset[asset][detailType].total += amount;
                     analysis.byAsset[asset][detailType].count++;
                     analysis.byAsset[asset][detailType].contracts += contracts;
@@ -790,34 +809,38 @@
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) setMode(true);
 
         // --- Inicialização Firebase ---
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-        getAnalytics(app); // Inicializa o Analytics
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            getAnalytics(app); // Inicializa o Analytics
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                const collectionPath = `artifacts/${appId}/public/data/operations`;
-                operationsCollection = collection(db, collectionPath);
-                
-                onSnapshot(query(operationsCollection), (snapshot) => {
-                    currentTrades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderCalendar(); // Renderiza o calendário com os dados
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    const collectionPath = `artifacts/${appId}/public/data/operations`;
+                    operationsCollection = collection(db, collectionPath);
                     
-                    // Atualiza as abas ativas
-                    if (!document.getElementById('patrimonio').classList.contains('hidden')) updateEquityChart();
-                    if (!document.getElementById('analise').classList.contains('hidden')) updateAnalysis();
-                }, (error) => {
-                     console.error("Erro ao buscar dados (onSnapshot):", error);
-                });
+                    onSnapshot(query(operationsCollection), (snapshot) => {
+                        currentTrades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderCalendar(); // Renderiza o calendário com os dados
+                        
+                        // Atualiza as abas ativas
+                        if (!document.getElementById('patrimonio').classList.contains('hidden')) updateEquityChart();
+                        if (!document.getElementById('analise').classList.contains('hidden')) updateAnalysis();
+                    }, (error) => {
+                         console.error("Erro ao buscar dados (onSnapshot):", error);
+                    });
 
-            } else {
-                signInAnonymously(auth).catch(error => {
-                    console.error("Erro no login anônimo:", error);
-                });
-            }
-        });
+                } else {
+                    signInAnonymously(auth).catch(error => {
+                        console.error("Erro no login anônimo:", error);
+                    });
+                }
+            });
+        } catch (e) {
+            console.error("Erro ao inicializar o Firebase:", e);
+        }
 
         // Render inicial (para mostrar o calendário vazio antes dos dados chegarem)
         renderCalendar();
