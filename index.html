@@ -71,6 +71,25 @@
             color: #f87171; /* red-400 */
             border-color: rgba(248, 113, 113, 0.3);
         }
+
+        /* NOVO: Estilo para o resumo da semana */
+        .week-summary-box {
+            aspect-ratio: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            border-radius: 1rem;
+            background: #f3f4f6; /* bg-gray-100 */
+            padding: 0.5rem;
+            font-size: 0.7rem;
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+        .dark .week-summary-box {
+            background: #1f2937; /* dark:bg-gray-800 */
+            border-color: #374151; /* dark:border-gray-700 */
+        }
         
         /* Estilo para botões de rádio Buy/Sell no modal */
         input[name="tradeType"]:checked + span {
@@ -108,8 +127,8 @@
             font-weight: 800;
         }
 
-        /* Estilo para botões de filtro de análise ativos */
-        .analysis-filter-btn.active {
+        /* Estilo para botões de filtro ativos */
+        .filter-btn.active {
             background-color: #2563eb; /* bg-blue-600 */
             color: #ffffff;
         }
@@ -147,7 +166,7 @@
                 </div>
                 <!-- NOVO: Saldo da Semana -->
                 <div class="border-t border-gray-700 pt-2">
-                    <p class="text-sm text-gray-400">Saldo da Semana</p>
+                    <p class="text-sm text-gray-400">Saldo da Semana (Atual)</p>
                     <p id="sidebarWeekBalance" class="text-xl font-bold text-white">R$ 0,00</p>
                 </div>
             </div>
@@ -216,20 +235,35 @@
 
                     <!-- CALENDÁRIO -->
                     <div>
-                        <div class="grid grid-cols-7 text-center font-bold text-sm uppercase tracking-wider text-gray-500 dark:text-gray-300 py-4">
+                        <!-- MUDANÇA: Grid com 8 colunas -->
+                        <div class="grid grid-cols-8 text-center font-bold text-sm uppercase tracking-wider text-gray-500 dark:text-gray-300 py-4">
                             <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                            <div class="text-blue-600 dark:text-blue-400">Semana</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
+                        <div id="calendarGrid" class="grid grid-cols-8 gap-2">
+                            <!-- Dias e Resumos da Semana serão inseridos aqui -->
+                        </div>
                     </div>
                 </section>
 
                 <!-- PATRIMÔNIO -->
                 <section id="patrimonio" class="tab-content hidden space-y-8">
-                    <div class="flex flex-wrap gap-4 items-center">
-                        <label class="text-sm font-medium dark:text-gray-200">Inicial (R$):</label>
-                        <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 w-32">
-                        <button id="updateEquityChart" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl hover:shadow-lg transition">Atualizar</Geral></button>
+                    <div class="flex flex-wrap gap-4 items-center justify-between">
+                        <!-- Input de Saldo Inicial -->
+                        <div class="flex gap-2 items-center">
+                            <label class="text-sm font-medium dark:text-gray-200">Inicial (R$):</label>
+                            <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 w-32">
+                        </div>
+                        
+                        <!-- NOVO: Filtros de Período do Gráfico -->
+                        <nav id="equityChartFilters" class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
+                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Geral</button>
+                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Mês</button>
+                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Semana</button>
+                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Dia</button>
+                        </nav>
                     </div>
+                    
                     <div class="relative h-64 md:h-96">
                         <canvas id="equityChart"></canvas>
                     </div>
@@ -265,11 +299,11 @@
                 <section id="analise" class="tab-content hidden space-y-8">
                     <!-- FILTROS DE ANÁLISE -->
                     <div class="flex justify-center">
-                        <nav class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
-                            <button data-filter="all" class="analysis-filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Geral</button>
-                            <button data-filter="month" class="analysis-filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Mês</button>
-                            <button data-filter="week" class="analysis-filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Semana</button>
-                            <button data-filter="day" class="analysis-filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Dia</button>
+                        <nav id="analysisChartFilters" class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
+                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Geral</button>
+                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Mês</button>
+                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Semana</button>
+                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Dia</button>
                         </nav>
                     </div>
 
@@ -347,9 +381,12 @@
     <script type="module">
         // Firebase imports e config (exato do seu código original)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query }
+            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics }
+            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // Configuração do Firebase
         const firebaseConfig = {
@@ -370,6 +407,7 @@
         let currentEditingTradeId = null;
         let currentDate = new Date();
         let currentAnalysisFilter = 'all'; 
+        let currentEquityFilter = 'all'; // NOVO: Filtro para o gráfico de patrimônio
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
         // Elementos DOM 
@@ -414,7 +452,6 @@
 
             // Patrimônio
             initialEquity: document.getElementById('initialEquity'),
-            updateEquityChart: document.getElementById('updateEquityChart'),
             equityChart: document.getElementById('equityChart').getContext('2d'),
             patrimonioToday: document.getElementById('patrimonioToday'),
             patrimonioWeek: document.getElementById('patrimonioWeek'),
@@ -550,11 +587,16 @@
                 tradesByDay[day].push(parseFloat(trade.amount));
             });
 
-            // Dias em branco
+            // MUDANÇA: Lógica para Saldo da Semana
+            let weekTrades = [];
+            let dayCounter = 0;
+
+            // Dias em branco (Respeitando a grade de 8 colunas)
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'day-box empty bg-gray-50 dark:bg-gray-800/50';
                 els.calendarGrid.appendChild(emptyDay);
+                dayCounter++;
             }
 
             // Dias do mês
@@ -562,6 +604,9 @@
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 let dayTrades = tradesByDay[day] || [];
                 let dayResult = dayTrades.reduce((acc, val) => acc + val, 0);
+
+                // Acumula trades da semana
+                weekTrades.push(...dayTrades);
 
                 const dayEl = document.createElement('div');
                 dayEl.className = 'day-box bg-white dark:bg-gray-800 p-1 cursor-pointer transition-all';
@@ -573,11 +618,46 @@
                 dayEl.addEventListener('click', () => openModal(dateString));
                 if (dayTrades.length > 0) dayEl.classList.add('has-trade');
                 els.calendarGrid.appendChild(dayEl);
+                dayCounter++;
+
+                // Se for Sábado (dia 6 do week index, que agora é 0-indexed para 7 colunas)
+                // ou o último dia do mês
+                const isSaturday = (firstDay + day - 1) % 7 === 6;
+                const isLastDay = day === daysInMonth;
+
+                // Adiciona o resumo da semana
+                if (isSaturday || isLastDay) {
+                    const weekResult = weekTrades.reduce((acc, val) => acc + val, 0);
+                    const summaryBox = document.createElement('div');
+                    summaryBox.className = 'week-summary-box';
+                    
+                    const resultColor = weekResult >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                    summaryBox.innerHTML = `
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-300">Total</span>
+                        <span class="font-black text-lg ${resultColor}">R$ ${weekResult.toFixed(2)}</span>
+                    `;
+                    els.calendarGrid.appendChild(summaryBox);
+                    
+                    // Reseta para a próxima semana
+                    weekTrades = [];
+                }
+
+                // Se for o último dia E não for sábado, preenche o resto da linha
+                if (isLastDay && !isSaturday) {
+                     // Quantos dias faltam para o sábado (coluna 6)
+                    const remainingDays = 6 - ((firstDay + day - 1) % 7);
+                    for (let i = 0; i < remainingDays; i++) {
+                        const emptyDay = document.createElement('div');
+                        emptyDay.className = 'day-box empty bg-gray-50 dark:bg-gray-800/50';
+                        els.calendarGrid.appendChild(emptyDay);
+                    }
+                }
             }
 
             updateHeaderSummary(monthTrades);
-            updatePatrimonioSummary(); // Atualiza os resumos em todas as abas
+            updatePatrimonioSummary();
         }
+
 
         // Atualiza o resumo no header e na sidebar
         function updateHeaderSummary(monthTrades) {
@@ -670,10 +750,29 @@
             }
         };
 
-        // --- Lógica do Gráfico de Patrimônio ---
+        // --- Lógica do Gráfico de Patrimônio (COM FILTROS) ---
         function updateEquityChart() {
             const initialEquity = parseFloat(els.initialEquity.value) || 0;
-            const sortedTrades = [...currentTrades].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // --- NOVO: Lógica de Filtragem de Trades ---
+            const today = new Date().toISOString().split('T')[0];
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            const monthStart = new Date();
+            monthStart.setDate(1);
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+
+            const filteredTrades = currentTrades.filter(trade => {
+                if (currentEquityFilter === 'all') return true;
+                if (currentEquityFilter === 'day') return trade.date === today;
+                if (currentEquityFilter === 'week') return trade.date >= weekStartStr;
+                if (currentEquityFilter === 'month') return trade.date >= monthStartStr;
+                return true;
+            });
+            // --- Fim da Lógica de Filtragem ---
+
+            const sortedTrades = [...filteredTrades].sort((a, b) => new Date(a.date) - new Date(b.date));
             const labels = ['Início'];
             const data = [initialEquity];
             let currentEquity = initialEquity;
@@ -711,7 +810,8 @@
                                 return '#16a34a'; // Verde padrão
                             }
                             const gradient = canvasCtx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                            const zeroY = chart.scales.y.getPixelForValue(initialEquity);
+                            // O "eixo 0" é o valor inicial
+                            const zeroY = chart.scales.y.getPixelForValue(initialEquity); 
                             
                             if (!isFinite(zeroY)) {
                                 return '#16a34a'; // Verde padrão
@@ -732,7 +832,7 @@
                                 return 'rgba(34, 197, 94, 0.2)'; // Verde padrão
                             }
                             const gradient = canvasCtx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                            const zeroY = chart.scales.y.getPixelForValue(initialEquity);
+                            const zeroY = chart.scales.y.getPixelForValue(initialEquity); // Eixo 0 é o inicial
                             
                             if (!isFinite(zeroY) || chartArea.bottom <= 0) {
                                 return 'rgba(34, 197, 94, 0.2)'; // Verde padrão
@@ -774,7 +874,19 @@
                 }
             });
         }
-        els.updateEquityChart.onclick = updateEquityChart;
+        // Atualiza o gráfico quando o saldo inicial muda
+        els.initialEquity.addEventListener('change', updateEquityChart); 
+        
+        // --- NOVO: Lógica para Filtros do Gráfico de Patrimônio ---
+        document.querySelectorAll('#equityChartFilters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentEquityFilter = btn.dataset.filter;
+                document.querySelectorAll('#equityChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateEquityChart();
+            });
+        });
+
 
         // --- Função para os CARDS DO PATRIMÔNIO ---
         function updatePatrimonioSummary() {
@@ -961,7 +1073,7 @@
                 `;
             };
 
-            if (Object.keys(analysis.byAsset).length === 0) {
+            if (Object.keys(analysis.byAsset).length === 0 && filteredTrades.length === 0) {
                  els.analysisByAsset.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center col-span-full">Nenhum dado para este período.</p>`;
             } else {
                 Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
@@ -969,7 +1081,7 @@
                 });
             }
 
-            if (Object.keys(analysis.byType).length === 0) {
+            if (Object.keys(analysis.byType).length === 0 && filteredTrades.length === 0) {
                  els.analysisByType.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center col-span-full">Nenhum dado para este período.</p>`;
             } else {
                 Object.entries(analysis.byType).sort((a,b) => b[1].total - a[1].total).forEach(([type, data]) => {
@@ -1017,12 +1129,19 @@
                 els.pageTitle.nextElementSibling.textContent = pageSubtitles[tab] || "";
 
                 // Funções específicas da aba
-                if (tab === 'patrimonio') updateEquityChart();
+                if (tab === 'patrimonio') {
+                    // Reseta e atualiza o gráfico de patrimônio
+                    currentEquityFilter = 'all';
+                    document.querySelectorAll('#equityChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelector('#equityChartFilters .filter-btn[data-filter="all"]').classList.add('active');
+                    updateEquityChart();
+                    updatePatrimonioSummary(); // Atualiza os cards
+                }
                 if (tab === 'analise') {
                     // Reseta e atualiza a análise
                     currentAnalysisFilter = 'all';
-                    document.querySelectorAll('.analysis-filter-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelector('.analysis-filter-btn[data-filter="all"]').classList.add('active');
+                    document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelector('#analysisChartFilters .filter-btn[data-filter="all"]').classList.add('active');
                     updateAnalysis();
                 }
 
@@ -1034,10 +1153,10 @@
         });
 
         // --- Lógica: Filtro de Análise ---
-        document.querySelectorAll('.analysis-filter-btn').forEach(btn => {
+        document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentAnalysisFilter = btn.dataset.filter;
-                document.querySelectorAll('.analysis-filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 updateAnalysis();
             });
@@ -1115,7 +1234,6 @@
 
         // Render inicial e ativação de filtros
         renderCalendar();
-        document.querySelector('.analysis-filter-btn[data-filter="all"]').classList.add('active');
         document.querySelector('.sidebar-btn[data-tab="diario"]').click(); // Clica na primeira aba
 
     </script>
