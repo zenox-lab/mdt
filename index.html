@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-R" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meu Diário de Trades</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         /* Remove a barra de rolagem padrão do body quando o menu mobile está aberto */
         body.menu-open {
@@ -29,15 +29,21 @@
         .dark .day-box {
             border-color: #374151; /* dark:border-gray-700 */
         }
-        .day-box:not(.empty):hover {
+        .day-box:not(.empty):not(.disabled):hover {
             background: #f3f4f6; /* hover:bg-gray-100 */
         }
-        .dark .day-box:not(.empty):hover {
+        .dark .day-box:not(.empty):not(.disabled):hover {
             background: #374151; /* dark:hover:bg-gray-700 */
         }
-        .day-box.empty {
+        .day-box.empty, .day-box.disabled {
+            opacity: 0.3;
+            background: #f9fafb; /* bg-gray-50 */
+        }
+        .dark .day-box.empty, .dark .day-box.disabled {
+            background: #1f2937; /* dark:bg-gray-800 */
             opacity: 0.3;
         }
+
         .value-box {
             position: absolute; 
             top: 50%; 
@@ -72,7 +78,7 @@
             border-color: rgba(248, 113, 113, 0.3);
         }
 
-        /* NOVO: Estilo para o resumo da semana */
+        /* Estilo para o resumo da semana */
         .week-summary-box {
             aspect-ratio: 1; 
             display: flex; 
@@ -165,7 +171,7 @@
                     <p class="text-sm text-gray-300">Desempenho Geral</p>
                     <p id="contaValor" class="text-3xl font-bold text-white">R$ 0,00</p>
                 </div>
-                <!-- NOVO: Saldo da Semana -->
+                <!-- Saldo da Semana -->
                 <div class="border-t border-gray-700 pt-2">
                     <p class="text-sm text-gray-300">Saldo da Semana (Atual)</p>
                     <p id="sidebarWeekBalance" class="text-xl font-bold text-white">R$ 0,00</p>
@@ -213,11 +219,13 @@
                 <!-- Resumo (como na referência) -->
                 <div class="flex gap-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl shadow-lg p-4">
                     <div class="text-center">
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <p class="text-sm text-gray-500 dark:text-gray-200">Resultado do Mês</p>
                         <p id="headerNetResult" class="text-xl font-bold text-green-600">R$ 0,00</p>
                     </div>
                     <div class="border-l border-gray-200 dark:border-gray-700"></div>
                     <div class="text-center">
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <p class="text-sm text-gray-500 dark:text-gray-200">Win Rate</p>
                         <p id="headerWinRate" class="text-xl font-bold text-blue-600">0%</p>
                     </div>
@@ -238,12 +246,12 @@
 
                     <!-- CALENDÁRIO -->
                     <div>
-                        <!-- MUDANÇA: Grid com 8 colunas -->
-                        <div class="grid grid-cols-8 text-center font-bold text-sm uppercase tracking-wider text-gray-500 dark:text-gray-300 py-4">
-                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        <!-- MUDANÇA: Grid com 7 colunas (Sábado removido) -->
+                        <div class="grid grid-cols-7 text-center font-bold text-sm uppercase tracking-wider text-gray-500 dark:text-gray-300 py-4">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div>
                             <div class="text-blue-600 dark:text-blue-400">Semana</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-8 gap-2">
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
                             <!-- Dias e Resumos da Semana serão inseridos aqui -->
                         </div>
                     </div>
@@ -259,7 +267,7 @@
                             <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 w-32 dark:text-gray-100">
                         </div>
                         
-                        <!-- NOVO: Filtros de Período do Gráfico -->
+                        <!-- Filtros de Período do Gráfico -->
                         <nav id="equityChartFilters" class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
                             <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Geral</button>
                             <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Mês</button>
@@ -275,18 +283,18 @@
                     <!-- CARDS DE RESUMO (Patrimônio) -->
                     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Hoje</p>
                             <!-- CORREÇÃO: Texto mais claro -->
+                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Hoje</p>
                             <p id="patrimonioToday" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Semana</p>
                             <!-- CORREÇÃO: Texto mais claro -->
+                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Semana</p>
                             <p id="patrimonioWeek" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Mês</p>
                             <!-- CORREÇÃO: Texto mais claro -->
+                            <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Mês</p>
                             <p id="patrimonioMonth" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                     </div>
@@ -350,11 +358,13 @@
             <form id="tradeForm" class="space-y-4">
                 <input type="hidden" id="tradeDate">
                 <div>
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <label class="block font-semibold mb-2 dark:text-gray-200">Valor (R$)</label>
                     <input type="number" step="0.01" id="tradeAmount" required placeholder="150.00 ou -50.00" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 dark:text-gray-100">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <label class="block font-semibold mb-2 dark:text-gray-200">Ativo</label>
                         <select id="tradeAsset" required class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 dark:text-gray-100">
                             <option value="">Selecione...</option>
@@ -365,11 +375,13 @@
                         </select>
                     </div>
                     <div>
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <label class="block font-semibold mb-2 dark:text-gray-200">Contratos</label>
                         <input type="number" id="tradeContracts" min="1" value="1" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 dark:text-gray-100">
                     </div>
                 </div>
                 <div>
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <label class="block font-semibold mb-2 dark:text-gray-200">Tipo</label>
                     <div class="flex gap-4">
                         <label class="cursor-pointer"><input type="radio" name="tradeType" value="Buy" checked class="sr-only"><span class="px-6 py-3 rounded-xl bg-green-500 text-white font-bold shadow-md hover:shadow-lg transition-all duration-200">Buy</span></label>
@@ -377,6 +389,7 @@
                     </div>
                 </div>
                 <div>
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <label class="block font-semibold mb-2 dark:text-gray-200">Notas (opcional)</label>
                     <textarea id="tradeNotes" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 dark:text-gray-100" placeholder="Ex: Rompimento de topo..."></textarea>
                 </div>
@@ -417,7 +430,7 @@
         let currentEditingTradeId = null;
         let currentDate = new Date();
         let currentAnalysisFilter = 'all'; 
-        let currentEquityFilter = 'all'; // NOVO: Filtro para o gráfico de patrimônio
+        let currentEquityFilter = 'all'; 
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
         // Elementos DOM 
@@ -429,7 +442,7 @@
             headerNetResult: document.getElementById('headerNetResult'),
             headerWinRate: document.getElementById('headerWinRate'),
             contaValor: document.getElementById('contaValor'),
-            sidebarWeekBalance: document.getElementById('sidebarWeekBalance'), // NOVO
+            sidebarWeekBalance: document.getElementById('sidebarWeekBalance'), 
 
             // Calendário
             currentMonthYear: document.getElementById('currentMonthYear'),
@@ -488,7 +501,7 @@
             document.body.classList.remove('menu-open');
         }
         document.getElementById('menuToggle').onclick = openMenu;
-        els.overlay.onclick = closeMenu; // Corrigido
+        els.overlay.onclick = closeMenu; 
 
         // --- Funções do Modal ---
         function openModal(date) {
@@ -566,7 +579,7 @@
             if (e.target === els.tradeModal) closeModal(); 
         });
 
-        // --- Funções do Calendário e Resumos ---
+        // --- Funções do Calendário e Resumos (REMOVIDO SÁBADO) ---
         function renderCalendar() {
             els.calendarGrid.innerHTML = '';
             const year = currentDate.getFullYear();
@@ -590,15 +603,25 @@
             });
 
             let weekTrades = [];
+            let dayCounter = 0; // Contador de 0 a 6 (Dom a Semana)
 
             // 1. Dias em branco no início
             for (let i = 0; i < firstDayOfWeek; i++) {
+                if (i === 6) continue; // Pula o Sábado
                 els.calendarGrid.appendChild(createEmptyDayBox());
+                dayCounter++;
             }
 
             // 2. Dias do mês
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const currentDayOfWeek = new Date(year, month, day).getDay(); // 0-6
+                
+                // PULA O SÁBADO (dia 6)
+                if (currentDayOfWeek === 6) {
+                    continue; 
+                }
+                
                 let dayData = tradesByDay[day] || { trades: [] };
                 let dayResult = dayData.trades.reduce((acc, val) => acc + val, 0);
 
@@ -607,24 +630,28 @@
 
                 const dayEl = createDayBox(day, dateString, dayData.trades.length, dayResult);
                 els.calendarGrid.appendChild(dayEl);
+                dayCounter++;
 
-                const currentDayOfWeek = (firstDayOfWeek + day - 1) % 7;
-
-                // Se for Sábado (6) ou o último dia do mês, fechar a semana
-                if (currentDayOfWeek === 6 || day === daysInMonth) {
-                    // Adiciona o resumo da semana
+                // Se for Sexta (5) (pois Sábado 6 é pulado)
+                if (currentDayOfWeek === 5) {
                     els.calendarGrid.appendChild(createWeekSummaryBox(weekTrades));
                     weekTrades = []; // Reseta para a próxima semana
-                    
-                    // CORREÇÃO: Se for o último dia E não for sábado, preenche o resto
-                    if (day === daysInMonth && currentDayOfWeek !== 6) {
-                        const remainingEmptyDays = 6 - currentDayOfWeek;
-                        for (let i = 0; i < remainingEmptyDays; i++) {
-                             els.calendarGrid.appendChild(createEmptyDayBox());
-                        }
-                    }
+                    dayCounter = 0; // Reseta o contador da linha
                 }
             }
+
+            // 3. Preenchimento do final do calendário
+            // Se o mês não terminou numa Sexta, preenche o resto
+            if (dayCounter % 7 !== 0) {
+                // Preenche os dias vazios restantes
+                while (dayCounter % 7 !== 6) { // Preenche até a 6ª coluna
+                    els.calendarGrid.appendChild(createEmptyDayBox());
+                    dayCounter++;
+                }
+                // Adiciona a última caixa de resumo da semana
+                els.calendarGrid.appendChild(createWeekSummaryBox(weekTrades));
+            }
+
 
             updateHeaderSummary(monthTrades);
             updatePatrimonioSummary();
@@ -681,7 +708,7 @@
             els.contaValor.textContent = `R$ ${totalGeral.toFixed(2)}`;
             els.contaValor.className = totalGeral >= 0 ? 'text-3xl font-bold text-green-400' : 'text-3xl font-bold text-red-400';
 
-            // ATUALIZA SALDO DA SEMANA (NOVO)
+            // ATUALIZA SALDO DA SEMANA (Sidebar)
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay()); 
             const weekStartStr = weekStart.toISOString().split('T')[0];
@@ -759,7 +786,7 @@
         function updateEquityChart() {
             const initialEquity = parseFloat(els.initialEquity.value) || 0;
             
-            // --- NOVO: Lógica de Filtragem de Trades ---
+            // --- Lógica de Filtragem de Trades ---
             const today = new Date().toISOString().split('T')[0];
             const weekStart = new Date();
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
@@ -797,7 +824,8 @@
 
             const isDarkMode = document.documentElement.classList.contains('dark');
             const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = isDarkMode ? '#f3f4f6' : '#111827'; // CORREÇÃO: Texto mais claro
+            // CORREÇÃO AQUI: Mudar para branco no dark mode
+            const labelColor = isDarkMode ? '#FFFFFF' : '#111827'; 
 
             if (equityChartInstance) equityChartInstance.destroy();
 
@@ -818,7 +846,7 @@
                             // O "eixo 0" é o valor inicial
                             const zeroY = chart.scales.y.getPixelForValue(initialEquity); 
                             
-                            if (!isFinite(zeroY)) {
+                            if (!isFinite(zeroY) || !isFinite(chartArea.bottom)) {
                                 return '#16a34a'; // Verde padrão
                             }
 
@@ -840,7 +868,7 @@
                             const gradient = canvasCtx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
                             const zeroY = chart.scales.y.getPixelForValue(initialEquity); // Eixo 0 é o inicial
                             
-                            if (!isFinite(zeroY) || chartArea.bottom <= 0) {
+                            if (!isFinite(zeroY) || chartArea.bottom <= 0 || !isFinite(chartArea.bottom)) {
                                 return 'rgba(34, 197, 94, 0.2)'; // Verde padrão
                             }
 
@@ -883,7 +911,7 @@
         // Atualiza o gráfico quando o saldo inicial muda
         els.initialEquity.addEventListener('change', updateEquityChart); 
         
-        // --- NOVO: Lógica para Filtros do Gráfico de Patrimônio ---
+        // --- Lógica para Filtros do Gráfico de Patrimônio ---
         document.querySelectorAll('#equityChartFilters .filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentEquityFilter = btn.dataset.filter;
@@ -1065,6 +1093,7 @@
                 if (data.count === 0) {
                     return `
                         <div class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700/50 rounded">
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <span class="font-semibold dark:text-gray-100">${label}</span>
                             <span class="text-xs text-gray-400 dark:text-gray-400">Nenhum trade</span>
                         </div>
@@ -1075,8 +1104,8 @@
                 return `
                     <div class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700/50 rounded">
                         <div>
-                            <span class="font-semibold dark:text-gray-100">${label}</span>
                             <!-- CORREÇÃO: Texto mais claro -->
+                            <span class="font-semibold dark:text-gray-100">${label}</span>
                             <p class="text-xs text-gray-500 dark:text-gray-400">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
                         </div>
                         <span class="font-bold ${totalColor}">R$ ${data.total.toFixed(2)}</span>
