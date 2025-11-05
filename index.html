@@ -1,162 +1,140 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Diário de Trades</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Remove a barra de rolagem padrão do body quando o menu mobile está aberto */
-        body.menu-open {
-            overflow: hidden;
-        }
+        /* CSS Personalizado */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
 
-        /* Estilos do Calendário */
-        .day-box { 
-            aspect-ratio: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            font-size: 0.75rem; 
-            border-radius: 1rem;
-            border: 2px solid #9ca3af; /* border-gray-400 */
-            transition: all 0.2s ease;
-        }
-        .day-box:not(.empty):not(.disabled):hover {
-            background: #f3f4f6; /* hover:bg-gray-100 */
-            border-color: #3b82f6; /* hover:border-blue-500 */
-        }
-        /* Dias vazios */
-        .day-box.empty {
-            opacity: 0.3;
-            background: #f9fafb; /* bg-gray-50 */
-            border-color: #e5e7eb; /* border-gray-200 */
-            border-width: 1px; /* Borda mais fina para dias vazios */
-        }
-        /* Dias desativados (Sábado/Domingo) */
-        .day-box.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .day-box.disabled.saturday {
-            background: #d1d5db; /* bg-gray-300 (era #e5e7eb) */
-        }
-        .day-box.disabled.sunday {
-            background: #f3f4f6; /* bg-gray-100 */
-        }
-
-        /* NOVA CAIXA DE RESUMO DA SEMANA */
-        .week-summary-box {
-            aspect-ratio: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            border-radius: 1rem;
-            background-color: #1f2937; /* bg-gray-800 */
-            color: #f9fafb; /* text-gray-50 */
-            padding: 0.5rem;
-            text-align: center;
-        }
-        .week-summary-box .week-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #9ca3af; /* text-gray-400 */
-            text-transform: uppercase;
-        }
-        .week-summary-box .week-total {
-            font-size: 0.9rem;
-            font-weight: 800;
-        }
-
-
-        .value-box {
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 80%; 
-            height: 60%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            font-size: 0.8rem; 
-            border-radius: 0.5rem; 
-            background: rgba(22, 163, 74, 0.1); 
-            color: #15803d; 
-            border: 1px solid rgba(22, 163, 74, 0.2);
-        }
-        .value-box.loss { 
-            background: rgba(220, 38, 38, 0.1); 
-            color: #b91c1c; 
-            border-color: rgba(220, 38, 38, 0.2);
-        }
-        
-        input[name="tradeType"]:checked + span {
-            filter: brightness(1.1);
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            transform: scale(1.05);
-        }
-        
-        .donut-chart {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: conic-gradient(#16a34a var(--wins, 0deg), #e11d48 var(--wins, 0deg) 360deg);
+        /* Estilo da Caixa do Dia (Borda mais grossa) */
+        .day-box {
+            aspect-ratio: 1;
             position: relative;
+            font-size: 0.8rem;
+            border-bottom-width: 2px;
+            border-right-width: 2px;
+            border-color: #9ca3af; /* border-gray-400 */
+        }
+        /* Remove borda da última coluna */
+        .day-box:nth-child(8n) { border-right-width: 0; }
+        /* Remove borda da última linha */
+        .day-box:nth-child(n+33) { border-bottom-width: 0; }
+        .day-box:nth-child(n+41) { border-bottom-width: 0; }
+
+
+        .day-box .day-number {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.35rem;
+            font-weight: 600;
+            color: #374151; /* text-gray-700 */
+        }
+        
+        /* Caixa de Valor (Lucro/Prejuízo) */
+        .value-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            height: 60%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 800; /* Extra-bold */
+            font-size: 0.9rem;
+            border-radius: 0.375rem; /* rounded-md */
+            color: #15803d; /* green-700 */
+            background: rgba(34, 197, 94, 0.1); /* Fundo verde claro */
         }
-        .donut-chart::before {
-            content: '';
-            position: absolute;
-            width: 60px; 
-            height: 60px;
-            background: #f9fafb; /* bg-gray-50 */
+        .value-box.loss {
+            color: #b91c1c; /* red-700 */
+            background: rgba(239, 68, 68, 0.1); /* Fundo vermelho claro */
+        }
+
+        /* Dias Desativados (SÁBADO) */
+        .day-box.disabled.saturday {
+            background: #d1d5db; /* bg-gray-300 (mais escuro) */
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+        /* Fundo do DOMINGO (Ativo) */
+        .day-box.sunday {
+            background: #f3f4f6; /* bg-gray-100 (claro) */
+        }
+
+        /* Caixa de Resumo da Semana */
+        .week-summary-box {
+            background: #1f2937; /* bg-gray-800 */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            text-align: center;
+            border-bottom-width: 2px;
+            border-color: #9ca3af;
+        }
+        .week-summary-box .week-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #9ca3af; /* text-gray-400 */
+        }
+        .week-summary-box .week-total {
+            font-size: 1.1rem;
+        }
+        
+        /* Gráfico Donut (CSS Puro) */
+        .donut-chart {
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-        }
-        .donut-chart-text {
             position: relative;
-            z-index: 10;
-            font-size: 1.25rem;
+        }
+        .donut-chart .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .donut-chart .center-text .percent {
+            font-size: 1.5rem; /* text-2xl */
             font-weight: 800;
         }
+        .donut-chart .center-text .label {
+            font-size: 0.7rem;
+            color: #6b7280; /* text-gray-500 */
+        }
 
-        .filter-btn.active {
-            background-color: #2563eb; /* bg-blue-600 */
-            color: #ffffff;
-        }
-        .sidebar-btn.active {
-            background-color: #2563eb; /* bg-blue-600 */
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
     </style>
 </head>
-<body class="bg-slate-100 text-gray-900">
-    
-    <div class="flex min-h-screen">
-        <!-- BOTÃO HAMBURGUER (Mobile) -->
-        <button id="menuToggle" class="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/80 backdrop-blur rounded-lg shadow-lg">
-            <i class="fas fa-bars"></i>
-        </button>
+<body class="min-h-screen bg-gray-100 text-gray-900">
 
-        <!-- SIDEBAR -->
-        <aside id="sidebar" class="w-64 bg-gray-900 text-white p-6 flex flex-col fixed inset-y-0 left-0 z-40
-                           transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl">
-            
-            <div class="flex items-center gap-3 mb-10 pt-4 lg:pt-0">
-                <i class="fas fa-chart-line text-4xl text-blue-400"></i>
-                <h1 class="text-2xl font-black text-white">Diário de Trades</h1>
+    <!-- Container Principal (Sidebar + Conteúdo) -->
+    <div class="flex h-screen">
+
+        <!-- Sidebar Fixa -->
+        <aside class="w-64 bg-gray-900 text-white flex flex-col p-5 fixed h-full">
+            <!-- Logo/Título -->
+            <div class="flex items-center gap-3 mb-8 px-2">
+                <i class="fas fa-chart-line text-3xl text-blue-400"></i>
+                <h1 class="text-2xl font-black text-white">Meu Diário</h1>
             </div>
 
+            <!-- Botão de Menu (para Mobile) -->
+            <button id="menuToggle" class="md:hidden absolute top-5 right-5 text-xl p-2">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Resumo da Conta (Sidebar) -->
             <div class="bg-gray-800 rounded-2xl p-4 mb-8 text-center space-y-2">
                 <div>
                     <p class="text-sm text-gray-300">Desempenho (Mês)</p>
@@ -164,114 +142,136 @@
                 </div>
                 <div class="border-t border-gray-700 pt-2">
                     <p class="text-sm text-gray-300">Saldo da Semana (Atual)</p>
-                    <p id="sidebarWeekBalance" class="text-xl font-bold text-white">$ 0,00</p>
+                    <p id="sidebarWeekBalance" class="text-xl font-bold text-white">$ 0.00</p>
                 </div>
             </div>
 
+            <!-- Navegação Principal -->
             <nav class="flex-grow space-y-3">
-                <button data-tab="diario" class="sidebar-btn active w-full flex items-center gap-4 px-5 py-3 rounded-xl text-lg font-semibold transition-all hover:bg-gray-800">
-                    <i class="fas fa-calendar-alt fa-fw"></i>
+                <button data-tab="diario" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold">
+                    <i class="fas fa-calendar-alt w-5 text-center"></i>
                     <span>Diário</span>
                 </button>
-                <button data-tab="patrimonio" class="sidebar-btn w-full flex items-center gap-4 px-5 py-3 rounded-xl text-lg font-semibold transition-all hover:bg-gray-800 text-gray-400">
-                    <i class="fas fa-chart-line fa-fw"></i>
+                <button data-tab="patrimonio" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-chart-line w-5 text-center"></i>
                     <span>Patrimônio</span>
                 </button>
-                <button data-tab="analise" class="sidebar-btn w-full flex items-center gap-4 px-5 py-3 rounded-xl text-lg font-semibold transition-all hover:bg-gray-800 text-gray-400">
-                    <i class="fas fa-chart-pie fa-fw"></i>
+                <button data-tab="analise" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-800 font-semibold">
+                    <i class="fas fa-chart-pie w-5 text-center"></i>
                     <span>Análise</span>
                 </button>
             </nav>
-            
+
+            <!-- Rodapé da Sidebar -->
+            <div class="mt-auto text-center">
+                <p class="text-xs text-gray-500">&copy; 2025 Meu Diário de Trades</p>
+            </div>
         </aside>
 
-        <!-- OVERLAY (Mobile) -->
-        <div id="overlay" class="lg:hidden fixed inset-0 bg-black/50 z-30 hidden"></div>
+        <!-- Overlay do Menu (Mobile) -->
+        <div id="menuOverlay" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden"></div>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 lg:ml-64 p-4 md:p-8 lg:p-12 transition-all duration-300">
-            <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
-                <div>
-                    <h2 id="pageTitle" class="text-3xl font-bold text-gray-800">Calendário de Trades</h2>
-                    <p class="text-gray-500">Registre seus ganhos e perdas diárias.</p>
-                </div>
-                <div class="flex gap-6 bg-white/80 backdrop-blur rounded-2xl shadow-lg p-4">
-                    <div class="text-center">
-                        <p class="text-sm text-gray-500">Resultado do Mês</p>
-                        <p id="headerNetResult" class="text-xl font-bold text-green-600">$ 0,00</p>
-                    </div>
-                    <div class="border-l border-gray-200"></div>
-                    <div class="text-center">
-                        <p class="text-sm text-gray-500">Win Rate</p>
-                        <p id="headerWinRate" class="text-xl font-bold text-blue-600">0%</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Conteúdo Principal (Scrollável) -->
+        <main id="mainContent" class="flex-1 md:ml-64 bg-gray-100 overflow-y-auto">
+            <div class="p-4 md:p-8 max-w-7xl mx-auto">
 
-            <div class="bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8">
-                
                 <!-- DIÁRIO -->
                 <section id="diario" class="tab-content space-y-6">
-                    <div class="flex justify-between items-center">
+                    <!-- Cabeçalho do Diário -->
+                    <header class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">Calendário de Trades</h2>
+                            <p class="text-gray-600">Registre seus ganhos e perdas diárias.</p>
+                        </div>
+                        <div class="flex gap-4 p-4 bg-white rounded-2xl shadow-md">
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-500">Resultado do Mês</p>
+                                <p id="headerNetResult" class="text-xl font-bold text-gray-800">$ 0,00</p>
+                            </div>
+                            <div class="border-l border-gray-200 pl-4 text-right">
+                                <p class="text-sm font-medium text-gray-500">Win Rate (Mês)</p>
+                                <p id="headerWinRate" class="text-xl font-bold text-gray-800">0%</p>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <!-- Seletor de Mês -->
+                    <div class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-lg">
                         <button id="prevMonth" class="p-3 rounded-full hover:bg-gray-200 transition"><i class="fas fa-chevron-left"></i></button>
                         <h2 id="currentMonthYear" class="text-2xl font-bold text-gray-800"></h2>
                         <button id="nextMonth" class="p-3 rounded-full hover:bg-gray-200 transition"><i class="fas fa-chevron-right"></i></button>
                     </div>
 
-                    <!-- CALENDÁRIO -->
-                    <div>
-                        <!-- MUDANÇA: Grid de 8 colunas -->
-                        <div class="grid grid-cols-8 text-center font-bold text-sm uppercase tracking-wider text-gray-900 py-4">
-                            <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
-                            <div class="text-blue-600">Semana</div>
+                    <!-- Calendário (Grid de 8 Colunas) -->
+                    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-gray-400">
+                        <div class="grid grid-cols-8 text-center font-bold text-sm uppercase tracking-wider bg-gray-800 text-white py-4">
+                            <div>Seg</div>
+                            <div>Ter</div>
+                            <div>Qua</div>
+                            <div>Qui</div>
+                            <div>Sex</div>
+                            <div>Sáb</div>
+                            <div>Dom</div>
+                            <div class="border-l border-gray-700">Semana</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-8 gap-2">
-                            <!-- Dias serão inseridos aqui -->
+                        <div id="calendarGrid" class="grid grid-cols-8">
+                            <!-- Dias e Caixas da Semana serão gerados aqui -->
                         </div>
                     </div>
                 </section>
 
                 <!-- PATRIMÔNIO -->
-                <section id="patrimonio" class="tab-content hidden space-y-8">
-                    <div class="flex flex-wrap gap-4 items-center justify-between">
-                        <div class="flex gap-2 items-center">
-                            <label class="text-sm font-medium text-gray-800">Inicial ($):</label>
-                            <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-blue-500/50 w-32 text-gray-900">
+                <section id="patrimonio" class="tab-content hidden space-y-6">
+                    <!-- Cabeçalho -->
+                    <header>
+                        <h2 class="text-3xl font-bold text-gray-900">Evolução do Patrimônio</h2>
+                        <p class="text-gray-600">Veja o crescimento da sua conta ao longo do tempo.</p>
+                    </header>
+                    
+                    <!-- Resumos de Patrimônio (Hoje, Semana, Mês) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-white rounded-2xl shadow-lg text-center">
+                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Hoje</p>
+                            <p id="patrimonioToday" class="text-2xl font-black text-gray-800">$ 0,00</p>
                         </div>
-                        
-                        <nav id="equityChartFilters" class="flex bg-gray-100 rounded-xl shadow-lg overflow-hidden p-1">
-                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Geral</button>
-                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Mês</button>
-                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Semana</button>
-                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Dia</button>
-                        </nav>
+                        <div class="p-4 bg-white rounded-2xl shadow-lg text-center">
+                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Semana (Seg-Sex)</p>
+                            <p id="patrimonioWeek" class="text-2xl font-black text-gray-800">$ 0,00</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-2xl shadow-lg text-center">
+                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Mês (Seg-Sex)</p>
+                            <p id="patrimonioMonth" class="text-2xl font-black text-gray-800">$ 0,00</p>
+                        </div>
                     </div>
                     
-                    <div class="relative h-64 md:h-96">
-                        <canvas id="equityChart"></canvas>
+                    <!-- Gráfico de Evolução -->
+                    <div class="bg-white rounded-2xl shadow-2xl p-4 md:p-6">
+                        <!-- Filtros (Geral, Mês, Semana, Dia) -->
+                        <div class="flex flex-wrap gap-4 mb-6 items-center">
+                            <label class="text-sm font-medium">Patrimônio Inicial ($):</label>
+                            <input type="number" id="initialEquity" value="0" class="px-3 py-2 rounded-xl border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-blue-500 w-28">
+                            
+                            <div class="flex-grow flex-wrap flex justify-center md:justify-end gap-2">
+                                <button data-filter="geral" class="equity-filter-btn active px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold text-sm">Geral</button>
+                                <button data-filter="mes" class="equity-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm">Mês</button>
+                                <button data-filter="semana" class="equity-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm">Semana</button>
+                                <button data-filter="dia" class="equity-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold text-sm">Dia</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Canvas do Gráfico -->
+                        <div class="h-64 md:h-96">
+                            <canvas id="equityChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="p-4 bg-gray-50 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 text-gray-600">Lucro Hoje</p>
-                            <p id="patrimonioToday" class="text-2xl font-black text-gray-700">$ 0,00</p>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 text-gray-600">Lucro Semana</p>
-                            <p id="patrimonioWeek" class="text-2xl font-black text-gray-700">$ 0,00</p>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-2xl shadow-lg text-center">
-                            <p class="text-sm opacity-70 mb-2 text-gray-600">Lucro Mês</p>
-                            <p id="patrimonioMonth" class="text-2xl font-black text-gray-700">$ 0,00</p>
-                        </div>
-                    </div>
+                    
+                    <!-- Resumos (Pico, Gain, Loss) -->
                     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg text-white text-center">
-                            <p class="text-sm opacity-90 mb-2">Pico do Patrimônio</p>
+                            <p class="text-sm opacity-90 mb-2">Pico do Patrimônio</g>
                             <p id="patrimonioBiggestGain" class="text-2xl font-black">$ 0,00</p>
                         </div>
                         
-                        <!-- ALTERAÇÃO: Card de "Vale" substituído por um grid com Gain/Loss do Mês -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-4 bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl shadow-lg text-white text-center">
                                 <p class="text-sm opacity-90 mb-2">Maior Gain (Mês)</p>
@@ -286,55 +286,79 @@
                 </section>
 
                 <!-- ANÁLISE -->
-                <section id="analise" class="tab-content hidden space-y-8">
-                    <div class="flex justify-center">
-                        <nav id="analysisChartFilters" class="flex bg-gray-100 rounded-xl shadow-lg overflow-hidden p-1">
-                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Geral</button>
-                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Mês</button>
-                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Semana</button>
-                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 rounded-lg transition-all">Dia</button>
-                        </nav>
+                <section id="analise" class="tab-content hidden space-y-6">
+                    <!-- Cabeçalho -->
+                    <header>
+                        <h2 class="text-3xl font-bold text-gray-900">Análise de Desempenho</h2>
+                        <p class="text-gray-600">Entenda onde estão seus maiores ganhos e perdas.</p>
+                    </header>
+
+                    <!-- Filtros de Análise (Geral, Mês, Semana, Dia) -->
+                    <div class="flex flex-wrap justify-start gap-2 p-3 bg-white rounded-2xl shadow-lg">
+                        <button data-filter="geral" class="analysis-filter-btn active px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold">Geral</button>
+                        <button data-filter="mes" class="analysis-filter-btn px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold">Mês</button>
+                        <button data-filter="semana" class="analysis-filter-btn px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold">Semana</button>
+                        <button data-filter="dia" class="analysis-filter-btn px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold">Dia</button>
                     </div>
 
-                    <h3 class="text-xl font-bold flex items-center gap-2 pt-4 border-t border-gray-200 text-gray-800"><i class="fas fa-coins text-yellow-500"></i> Desempenho por Ativo</h3>
-                    <div id="analysisByAsset" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Cards de Ativo serão inseridos aqui pelo JS -->
-                    </div>
+                    <!-- Cards de Análise -->
+                    <div class="space-y-6">
+                        <!-- Análise por Ativo -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-3 text-gray-800">Desempenho por Ativo</h3>
+                            <div id="analysisByAsset" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                <!-- Cards de Ativo gerados aqui -->
+                            </div>
+                        </div>
+                        
+                        <!-- Análise por Tipo (Buy/Sell) -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-3 text-gray-800">Desempenho por Tipo (Buy/Sell)</h3>
+                            <div id="analysisByType" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <!-- Cards de Tipo gerados aqui -->
+                            </div>
+                        </div>
 
-                    <h3 class="text-xl font-bold flex items-center gap-2 mt-8 pt-4 border-t border-gray-200 text-gray-800"><i class="fas fa-arrows-alt-h text-purple-500"></i> Desempenho por Tipo (Buy/Sell)</h3>
-                    <div id="analysisByType" class="grid md:grid-cols-2 gap-6">
-                        <!-- Cards de Tipo serão inseridos aqui pelo JS -->
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-2xl p-5 mt-8 shadow-inner">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800"><i class="fas fa-search-dollar text-cyan-500"></i> Detalhado por Ativo</h3>
-                        <div id="detailedAnalysis" class="space-y-4">
-                            <!-- Análise detalhada (como estava) -->
+                        <!-- Análise Detalhada (Buy vs Sell por Ativo) -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-3 text-gray-800">Análise Detalhada (Buy vs Sell por Ativo)</h3>
+                            <div id="detailedAnalysis" class="space-y-4">
+                                <!-- Cards Detalhados gerados aqui -->
+                            </div>
                         </div>
                     </div>
                 </section>
-
-            </div> <!-- Fim do bg-white (main card) -->
+            </div>
         </main>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL (Formulário de Operação) -->
     <div id="tradeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 relative transform scale-95 transition-all duration-300" id="modalContent">
-            <button id="closeModal" class="absolute top-4 right-6 text-3xl text-gray-500 hover:text-gray-700">&times;</button>
-            <h3 class="text-2xl font-bold mb-6 text-gray-900">Operações do Dia</h3>
-            <div id="dailyTradesList" class="max-h-40 overflow-y-auto mb-6 border border-gray-200 rounded-lg py-2"></div>
-            <h4 id="formTitle" class="text-xl font-bold mb-4 text-gray-900">Adicionar Operação</h4>
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 md:p-8 relative transform scale-95 transition-all duration-300">
+            <!-- Botão de Fechar -->
+            <button id="closeModal" class="absolute top-4 right-5 text-3xl text-gray-400 hover:text-gray-600">&times;</button>
+            
+            <h3 class="text-2xl font-bold mb-4">Operações do Dia</h3>
+            
+            <!-- Lista de Trades do Dia -->
+            <div id="dailyTradesList" class="max-h-32 overflow-y-auto mb-4 border border-gray-200 rounded-lg py-2">
+                <!-- Trades do dia listados aqui -->
+            </div>
+            
+            <!-- Formulário -->
+            <h4 id="formTitle" class="text-xl font-bold mb-4">Adicionar Nova Operação</h4>
             <form id="tradeForm" class="space-y-4">
                 <input type="hidden" id="tradeDate">
+                
                 <div>
-                    <label class="block font-semibold mb-2 text-gray-800">Valor ($)</label>
-                    <input type="number" step="0.01" id="tradeAmount" required placeholder="150.00 ou -50.00" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50 text-gray-900">
+                    <label class="block font-semibold mb-2 text-gray-700">Valor ($)</label>
+                    <input type="number" step="0.01" id="tradeAmount" required placeholder="Ex: 150.00 ou -50.00" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50">
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-semibold mb-2 text-gray-800">Ativo</label>
-                        <select id="tradeAsset" required class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50 text-gray-900">
+                        <label class="block font-semibold mb-2 text-gray-700">Ativo</label>
+                        <select id="tradeAsset" required class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50">
                             <option value="">Selecione...</option>
                             <option value="XAUUSD">XAUUSD</option>
                             <option value="S&P500">S&P500</option>
@@ -343,21 +367,25 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2 text-gray-800">Contratos</label>
-                        <input type="number" id="tradeContracts" min="1" value="1" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50 text-gray-900">
+                        <label class="block font-semibold mb-2 text-gray-700">Contratos</label>
+                        <input type="number" id="tradeContracts" min="1" value="1" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50">
                     </div>
                 </div>
+                
                 <div>
-                    <label class="block font-semibold mb-2 text-gray-800">Tipo</label>
+                    <label class="block font-semibold mb-2 text-gray-700">Tipo</label>
                     <div class="flex gap-4">
-                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Buy" checked class="sr-only"><span class="px-6 py-3 rounded-xl bg-green-500 text-white font-bold shadow-md hover:shadow-lg transition-all duration-200">Buy</span></label>
-                        <label class="cursor-pointer"><input type="radio" name="tradeType" value="Sell" class="sr-only"><span class="px-6 py-3 rounded-xl bg-red-500 text-white font-bold shadow-md hover:shadow-lg transition-all duration-200">Sell</span></label>
+                        <label class="flex-1">
+                            <input type="radio" name="tradeType" value="Buy" checked class="sr-only peer">
+                            <span class="block w-full text-center px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-md hover:shadow-lg transition cursor-pointer peer-checked:bg-green-600 peer-checked:text-white">Buy</span>
+                        </label>
+                        <label class="flex-1">
+                            <input type="radio" name="tradeType" value="Sell" class="sr-only peer">
+                            <span class="block w-full text-center px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-md hover:shadow-lg transition cursor-pointer peer-checked:bg-red-600 peer-checked:text-white">Sell</span>
+                        </label>
                     </div>
                 </div>
-                <div>
-                    <label class="block font-semibold mb-2 text-gray-800">Notas (opcional)</label>
-                    <textarea id="tradeNotes" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 focus:ring-4 focus:ring-blue-500/50 text-gray-900" placeholder="Ex: Rompimento de topo..."></textarea>
-                </div>
+                
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" id="deleteTrade" class="hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition">Excluir</button>
                     <button type="submit" id="saveTradeBtn" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition">Salvar</button>
@@ -366,17 +394,14 @@
         </div>
     </div>
 
-    <script type="module">
-        // Firebase imports e config (exato do seu código original)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged }
-            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query }
-            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics }
-            from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
-        // Configuração do Firebase
+    <script type="module">
+        // --- IMPORTS DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURAÇÃO DO FIREBASE (Chave Pública) ---
         const firebaseConfig = {
             apiKey: "AIzaSyDYXehc5ijr11GD029ph7-6a0oVy9ddcKY",
             authDomain: "meu-diario-de-trades.firebaseapp.com",
@@ -386,53 +411,57 @@
             appId: "1:744192474673:web:c5adf1d9526b81deed1f10",
             measurementId: "G-LM9V31W7BE"
         };
-        const appId = 'meu-diario-de-trades';
+        const appId = 'meu-diario-de-trades'; // Usado no caminho do Firestore
 
-        // Variáveis Globais
+        // --- Variáveis Globais ---
         let app, db, auth, userId, operationsCollection;
-        let currentTrades = [];
+        let currentTrades = []; // Lista local de todos os trades
         let equityChartInstance = null;
         let currentEditingTradeId = null;
-        let currentDate = new Date();
-        let currentAnalysisFilter = 'all'; 
-        let currentEquityFilter = 'all'; 
+        let currentDate = new Date(); // Data para o calendário (muda com os botões)
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const dayNames = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-        // Elementos DOM 
+        // --- Elementos DOM (Cache) ---
         const els = {
-            // Sidebar e Header
-            sidebar: document.getElementById('sidebar'),
-            overlay: document.getElementById('overlay'),
-            pageTitle: document.getElementById('pageTitle'),
-            headerNetResult: document.getElementById('headerNetResult'),
-            headerWinRate: document.getElementById('headerWinRate'),
+            // Sidebar e Navegação
+            sidebar: document.querySelector('aside'),
+            menuToggle: document.getElementById('menuToggle'),
+            menuOverlay: document.getElementById('menuOverlay'),
+            mainContent: document.getElementById('mainContent'),
+            
+            // Resumo (Sidebar)
             contaValor: document.getElementById('contaValor'),
             sidebarWeekBalance: document.getElementById('sidebarWeekBalance'), 
+            
+            // Cabeçalho (Diário)
+            headerNetResult: document.getElementById('headerNetResult'),
+            headerWinRate: document.getElementById('headerWinRate'),
 
             // Calendário
             currentMonthYear: document.getElementById('currentMonthYear'),
             calendarGrid: document.getElementById('calendarGrid'),
-            
+            prevMonth: document.getElementById('prevMonth'),
+            nextMonth: document.getElementById('nextMonth'),
+
             // Modal
             tradeModal: document.getElementById('tradeModal'),
-            modalContent: document.getElementById('modalContent'), 
             closeModal: document.getElementById('closeModal'),
             tradeForm: document.getElementById('tradeForm'),
             tradeAmount: document.getElementById('tradeAmount'),
             tradeContracts: document.getElementById('tradeContracts'),
             tradeAsset: document.getElementById('tradeAsset'),
-            tradeNotes: document.getElementById('tradeNotes'),
             deleteTrade: document.getElementById('deleteTrade'),
             saveTradeBtn: document.getElementById('saveTradeBtn'),
             dailyTradesList: document.getElementById('dailyTradesList'),
             formTitle: document.getElementById('formTitle'),
-
+            
             // Patrimônio
-            initialEquity: document.getElementById('initialEquity'),
-            equityChart: document.getElementById('equityChart').getContext('2d'),
             patrimonioToday: document.getElementById('patrimonioToday'),
             patrimonioWeek: document.getElementById('patrimonioWeek'),
             patrimonioMonth: document.getElementById('patrimonioMonth'),
+            initialEquity: document.getElementById('initialEquity'),
+            equityChart: document.getElementById('equityChart').getContext('2d'),
             patrimonioBiggestGain: document.getElementById('patrimonioBiggestGain'),
             patrimonioMonthGain: document.getElementById('patrimonioMonthGain'),
             patrimonioMonthLoss: document.getElementById('patrimonioMonthLoss'),
@@ -442,51 +471,245 @@
             analysisByType: document.getElementById('analysisByType'),
             detailedAnalysis: document.getElementById('detailedAnalysis')
         };
-
-        let currentEditingDate = null;
-        const pageTitles = {
-            diario: "Calendário de Trades",
-            patrimonio: "Evolução do Patrimônio",
-            analise: "Análise de Desempenho"
+        
+        // --- Data Atual (Hoje) ---
+        const HOJE = new Date();
+        const HOJE_STR = HOJE.toISOString().split('T')[0];
+        
+        // --- Formatação de Moeda ---
+        const formatCurrency = (value) => {
+            const val = Number(value) || 0;
+            return `$ ${val.toFixed(2)}`;
         };
-        const pageSubtitles = {
-            diario: "Registre seus ganhos e perdas diárias.",
-            patrimonio: "Veja a curva de evolução da sua conta.",
-            analise: "Filtre seus resultados por período."
-        };
-
-        // --- Funções do Menu (Sidebar) ---
+        
+        // --- Lógica do Menu Mobile (Sidebar) ---
         function openMenu() {
             els.sidebar.classList.remove('-translate-x-full');
-            els.overlay.classList.remove('hidden');
-            document.body.classList.add('menu-open');
+            els.menuOverlay.classList.remove('hidden');
         }
         function closeMenu() {
             els.sidebar.classList.add('-translate-x-full');
-            els.overlay.classList.add('hidden');
-            document.body.classList.remove('menu-open');
+            els.menuOverlay.classList.add('hidden');
         }
-        document.getElementById('menuToggle').onclick = openMenu;
-        els.overlay.onclick = closeMenu; 
+        // Ajuste CSS inicial para mobile
+        els.sidebar.classList.add('fixed', 'h-full', 'z-20', 'transform', '-translate-x-full', 'md:translate-x-0', 'transition-transform');
+        // Eventos
+        els.menuToggle.onclick = openMenu;
+        els.menuOverlay.onclick = closeMenu;
+        els.mainContent.onclick = closeMenu;
 
-        // --- Funções do Modal ---
+
+        // --- Lógica de Navegação por Abas ---
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+
+                // Estilo dos botões
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('text-gray-300', 'hover:bg-gray-800');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('text-gray-300', 'hover:bg-gray-800');
+
+                // Mostrar/Esconder Conteúdo
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                document.getElementById(tabId).classList.remove('hidden');
+
+                // Ações específicas da aba
+                if (tabId === 'patrimonio') {
+                    updateEquityChart(); // Desenha o gráfico
+                }
+                if (tabId === 'analise') {
+                    updateAnalysis(); // Atualiza a análise
+                }
+                
+                if (window.innerWidth < 768) closeMenu(); // Fecha o menu no mobile
+            });
+        });
+
+        // --- Lógica do Calendário (Diário) ---
+
+        // Cria caixa de dia vazia
+        function createEmptyDayBox() {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'day-box bg-gray-50 border-b-2 border-r-2 border-gray-400 opacity-50';
+            return emptyDay;
+        }
+
+        // Cria caixa de resumo da semana
+        function createWeekSummaryBox(total, weekNum) {
+            const weekBox = document.createElement('div');
+            weekBox.className = 'week-summary-box';
+            const totalColor = total >= 0 ? 'text-green-400' : 'text-red-400';
+            weekBox.innerHTML = `
+                <span class="week-label">Semana ${weekNum}</span>
+                <span class="week-total ${totalColor}">${formatCurrency(total)}</span>
+            `;
+            return weekBox;
+        }
+        
+        function renderCalendar() {
+            els.calendarGrid.innerHTML = '';
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            els.currentMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+            // Mapeia o primeiro dia (Seg=0, Dom=6)
+            const firstDayOfMonth = new Date(year, month, 1).getDay(); // Dom=0, Seg=1...
+            const firstDayMapped = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1; // Seg=0... Dom=6
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Filtra trades do mês
+            const monthTrades = currentTrades.filter(t => {
+                const [tYear, tMonth] = t.date.split('-').map(Number);
+                return tYear === year && (tMonth - 1) === month;
+            });
+
+            // Agrupa trades por dia
+            const tradesByDay = {};
+            monthTrades.forEach(trade => {
+                const day = parseInt(trade.date.split('-')[2]);
+                if (!tradesByDay[day]) tradesByDay[day] = [];
+                tradesByDay[day].push(parseFloat(trade.amount));
+            });
+
+            let weekTotal = 0;
+            let weekNumber = 1;
+            let currentDayInGrid = 0; // Contador de 0 a 7 (Seg a Semana)
+
+            // 1. Dias em branco no início
+            for (let i = 0; i < firstDayMapped; i++) {
+                els.calendarGrid.appendChild(createEmptyDayBox());
+                currentDayInGrid++;
+            }
+
+            // 2. Dias do mês
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Pega o dia da semana (Seg=0... Dom=6)
+                const dayOfWeek = (new Date(year, month, day).getDay() === 0) ? 6 : new Date(year, month, day).getDay() - 1;
+
+                let dayTrades = tradesByDay[day] || [];
+                let dayResult = dayTrades.reduce((acc, val) => acc + val, 0);
+
+                // --- Cria a caixa do dia ---
+                const dayEl = document.createElement('div');
+                const borderColor = (dateString === HOJE_STR) ? 'border-blue-500' : 'border-gray-400';
+                
+                // LÓGICA DE DESATIVAÇÃO (SÁBADO)
+                const isSaturday = (dayOfWeek === 5); // 5 = Sábado
+                const isSunday = (dayOfWeek === 6); // 6 = Domingo
+                
+                let dayClasses = `day-box ${borderColor} p-1`;
+                if (isSaturday) {
+                    dayClasses += ' disabled saturday'; // Desativado + Fundo Cinza Escuro
+                } else if (isSunday) {
+                    dayClasses += ' sunday cursor-pointer hover:bg-gray-200'; // Ativo + Fundo Cinza Claro
+                } else {
+                    dayClasses += ' cursor-pointer hover:bg-gray-200'; // Dias normais (Seg-Sex)
+                }
+
+                dayEl.className = dayClasses;
+                dayEl.dataset.date = dateString;
+                dayEl.innerHTML = `<span class="day-number text-gray-800">${day}</span>`;
+
+                if (dayTrades.length > 0) {
+                    dayEl.innerHTML += `<div class="value-box ${dayResult >= 0 ? '' : 'loss'}">${formatCurrency(Math.abs(dayResult))}</div>`;
+                }
+                
+                // Adiciona evento de clique (se NÃO for Sábado)
+                if (!isSaturday) {
+                    dayEl.addEventListener('click', () => openModal(dateString));
+                    // Adiciona ao total da semana (Seg-Sex E Dom)
+                    weekTotal += dayResult;
+                }
+                
+                els.calendarGrid.appendChild(dayEl);
+                currentDayInGrid++;
+
+                // Se for Domingo (fim da linha), adiciona a caixa da semana
+                if (currentDayInGrid % 8 === 7) { // 7 é o índice do Domingo
+                    els.calendarGrid.appendChild(createWeekSummaryBox(weekTotal, weekNumber));
+                    weekTotal = 0; // Reseta a soma
+                    weekNumber++;
+                    currentDayInGrid++; // Incrementa para a 8ª coluna
+                }
+            }
+
+            // 3. Dias em branco no final E ÚLTIMA CAIXA DE SEMANA
+            const lastDayOfWeek = (new Date(year, month, daysInMonth).getDay() === 0) ? 6 : new Date(year, month, daysInMonth).getDay() - 1;
+            
+            // Se o mês não terminou no Domingo (índice 6)
+            if (lastDayOfWeek < 6) {
+                // Preenche os dias vazios restantes (ex: se terminou na Quarta, preenche Qui, Sex, Sab, Dom)
+                for (let i = lastDayOfWeek + 1; i <= 6; i++) {
+                     els.calendarGrid.appendChild(createEmptyDayBox());
+                }
+                // Adiciona a caixa da semana final
+                els.calendarGrid.appendChild(createWeekSummaryBox(weekTotal, weekNumber));
+            }
+
+            updateHeaderSummary(monthTrades); // Atualiza resumo do cabeçalho
+            updatePatrimonioSummary(); // Atualiza resumos (sidebar e patrimônio)
+        }
+
+        // Atualiza Resumo (Cabeçalho do Diário e Sidebar)
+        function updateHeaderSummary(monthTrades) {
+            const totalResult = monthTrades.reduce((acc, t) => acc + parseFloat(t.amount), 0);
+            const winningTrades = monthTrades.filter(t => parseFloat(t.amount) > 0).length;
+            const total = monthTrades.length;
+
+            els.headerNetResult.textContent = formatCurrency(totalResult);
+            els.headerNetResult.className = totalResult >= 0 ? 'text-xl font-bold text-green-600' : 'text-xl font-bold text-red-600';
+
+            const winRate = total > 0 ? (winningTrades / total) * 100 : 0;
+            els.headerWinRate.textContent = `${winRate.toFixed(0)}%`;
+            
+            // ATUALIZA O "DESEMPENHO (MÊS)" da sidebar
+            els.contaValor.textContent = formatCurrency(totalResult);
+            els.contaValor.className = totalResult >= 0 ? 'text-3xl font-bold text-green-400' : 'text-3xl font-bold text-red-400';
+        }
+
+        // Navegação do Calendário
+        els.prevMonth.onclick = () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        };
+        els.nextMonth.onclick = () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        };
+
+        // --- Lógica do Modal ---
+
         function openModal(date) {
             if (!date) return;
-            currentEditingDate = date;
+            // Verifica se é Sábado (não deve ser clicável, mas é uma segurança)
+            const dayOfWeek = (new Date(date + 'T12:00:00').getDay() === 0) ? 6 : new Date(date + 'T12:00:00').getDay() - 1;
+            if (dayOfWeek === 5) return; // 5 = Sábado
+
+            document.getElementById('tradeDate').value = date;
             resetForm();
             els.dailyTradesList.innerHTML = '';
-            const tradesOfTheDay = currentTrades.filter(t => t.date === date).sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+            const tradesOfTheDay = currentTrades
+                .filter(t => t.date === date)
+                .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0)); // Ordena pela hora de criação
+
             if (tradesOfTheDay.length > 0) {
                 tradesOfTheDay.forEach(trade => {
                     const amount = parseFloat(trade.amount);
                     const typeLabel = trade.type === 'Buy' ? 'B' : 'S';
                     const assetLabel = trade.asset || 'N/A';
                     const contracts = trade.contracts || 1;
-                    const amountColor = amount >= 0 ? 'text-green-600' : 'text-red-600'; 
+                    const amountColor = amount >= 0 ? 'text-green-600' : 'text-red-600';
                     els.dailyTradesList.innerHTML += `
                         <div class="p-3 mx-2 flex justify-between items-center cursor-pointer hover:bg-gray-100 rounded-lg transition" data-trade-id="${trade.id}">
                             <div>
-                                <span class="font-bold ${amountColor}">$ ${amount.toFixed(2)}</span>
+                                <span class="font-bold ${amountColor}">${formatCurrency(amount)}</span>
                                 <span class="text-xs text-gray-500 ml-2">(${contracts}c, ${assetLabel}/${typeLabel})</span>
                             </div>
                             <i class="fas fa-pencil-alt text-xs text-gray-400"></i>
@@ -497,10 +720,11 @@
                     item.addEventListener('click', () => loadTradeForEdit(item.dataset.tradeId));
                 });
             } else {
-                els.dailyTradesList.innerHTML = '<p class="p-4 text-sm text-gray-400 text-center">Nenhuma operação neste dia.</p>';
+                els.dailyTradesList.innerHTML = '<p class="p-3 text-sm text-gray-400 text-center">Nenhuma operação neste dia.</p>';
             }
+            
             els.tradeModal.classList.remove('hidden');
-            setTimeout(() => els.modalContent.classList.add('scale-100'), 10);
+            setTimeout(() => els.tradeModal.querySelector('div').classList.add('scale-100'), 10);
             els.tradeAmount.focus();
         }
 
@@ -508,7 +732,6 @@
             els.tradeForm.reset();
             els.tradeContracts.value = '1';
             els.tradeAsset.value = '';
-            els.tradeNotes.value = '';
             document.querySelector('input[name="tradeType"][value="Buy"]').checked = true;
             currentEditingTradeId = null;
             els.deleteTrade.classList.add('hidden');
@@ -522,7 +745,6 @@
             els.tradeAmount.value = trade.amount;
             els.tradeContracts.value = trade.contracts || 1;
             els.tradeAsset.value = trade.asset || '';
-            els.tradeNotes.value = trade.notes || '';
             document.querySelector(`input[name="tradeType"][value="${trade.type || 'Buy'}"]`).checked = true;
             currentEditingTradeId = tradeId;
             els.saveTradeBtn.textContent = 'Atualizar';
@@ -532,279 +754,137 @@
         }
 
         function closeModal() {
-            els.modalContent.classList.remove('scale-100');
+            const modalDiv = els.tradeModal.querySelector('div');
+            modalDiv.classList.remove('scale-100');
+            modalDiv.classList.add('scale-95');
             setTimeout(() => {
                 els.tradeModal.classList.add('hidden');
-                currentEditingDate = null;
                 resetForm();
-            }, 300); 
+            }, 200);
         }
         els.closeModal.onclick = closeModal;
-        els.tradeModal.addEventListener('click', (e) => { 
-            if (e.target === els.tradeModal) closeModal(); 
-        });
+        els.tradeModal.addEventListener('click', (e) => { if (e.target === els.tradeModal) closeModal(); });
 
-        // --- Funções do Calendário (Seg - Dom + Semana) ---
-        function renderCalendar() {
-            els.calendarGrid.innerHTML = '';
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            els.currentMonthYear.textContent = `${monthNames[month]} ${year}`;
-            
-            // Lógica para Seg-Dom (0=Seg, 6=Dom)
-            let firstDayOfWeek = new Date(year, month, 1).getDay();
-            if (firstDayOfWeek === 0) {
-                firstDayOfWeek = 6; // Se for Domingo (0), vira 6
-            } else {
-                firstDayOfWeek = firstDayOfWeek - 1; // Senão, subtrai 1 (Seg=1 -> 0, Ter=2 -> 1, ...)
-            }
-            
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // --- Lógica do Formulário (Salvar/Editar/Deletar) ---
 
-            const monthTrades = currentTrades.filter(t => {
-                const [tYear, tMonth] = t.date.split('-').map(Number);
-                return tYear === year && (tMonth - 1) === month;
-            });
-
-            const tradesByDay = {};
-            monthTrades.forEach(trade => {
-                const day = parseInt(trade.date.split('-')[2]);
-                if (!tradesByDay[day]) tradesByDay[day] = {};
-                if (!tradesByDay[day].trades) tradesByDay[day].trades = [];
-                tradesByDay[day].trades.push(parseFloat(trade.amount));
-            });
-            
-            let weekTotal = 0;
-            let weekNumber = 1;
-            let currentDayInGrid = 0; // Contador para saber quando fechar a semana
-
-            // 1. Dias em branco no início
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                els.calendarGrid.appendChild(createEmptyDayBox());
-                currentDayInGrid++;
-            }
-
-            // 2. Dias do mês
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateObj = new Date(year, month, day);
-                const dayOfWeek = dateObj.getDay(); // 0 (Dom) - 6 (Sáb)
-                
-                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let dayData = tradesByDay[day] || { trades: [] };
-                let dayResult = dayData.trades.reduce((acc, val) => acc + val, 0);
-
-                const isDisabled = (dayOfWeek === 0 || dayOfWeek === 6);
-                const isSaturday = (dayOfWeek === 6);
-                const isSunday = (dayOfWeek === 0);
-
-                // SOMA APENAS DIAS OPERÁVEIS (SEG-SEX)
-                if (!isDisabled) {
-                    weekTotal += dayResult;
-                }
-
-                const dayEl = createDayBox(day, dateString, dayData.trades.length, dayResult, isDisabled, isSaturday, isSunday);
-                els.calendarGrid.appendChild(dayEl);
-                currentDayInGrid++;
-
-                // Se for Domingo (fim da linha), adiciona a caixa da semana
-                if (currentDayInGrid % 7 === 0) {
-                    els.calendarGrid.appendChild(createWeekSummaryBox(weekTotal, weekNumber));
-                    weekTotal = 0; // Reseta a soma
-                    weekNumber++;
-                }
-            }
-
-            // 3. Dias em branco no final E ÚLTIMA CAIXA DE SEMANA (LÓGICA CORRIGIDA)
-            if (currentDayInGrid % 7 !== 0) {
-                // Se a grade não terminou no domingo (ou seja, não tem 7 dias na última linha)
-                
-                // Preenche os dias vazios restantes (Seg, Ter, ... Dom)
-                while (currentDayInGrid % 7 !== 0) {
-                    els.calendarGrid.appendChild(createEmptyDayBox());
-                    currentDayInGrid++;
-                }
-                
-                // Adiciona a caixa da semana SÓ AQUI
-                els.calendarGrid.appendChild(createWeekSummaryBox(weekTotal, weekNumber));
-            }
-            // Se currentDayInGrid % 7 === 0, significa que a caixa da semana
-            // já foi adicionada DENTRO do loop, então não fazemos nada.
-            // A chamada final 'appendChild' que estava aqui foi removida para corrigir o bug da "Semana 6".
-
-            updateHeaderSummary(monthTrades);
-            updatePatrimonioSummary();
-        }
-
-        // Nova função para criar a caixa de resumo da semana
-        function createWeekSummaryBox(total, weekNum) {
-            const summaryEl = document.createElement('div');
-            summaryEl.className = 'week-summary-box';
-            
-            const totalColor = total >= 0 ? 'text-green-400' : 'text-red-400';
-            
-            summaryEl.innerHTML = `
-                <span class="week-title">Semana ${weekNum}</span>
-                <span class="week-total ${totalColor}">$ ${total.toFixed(2)}</span>
-            `;
-            return summaryEl;
-        }
-
-        function createEmptyDayBox() {
-            const emptyDay = document.createElement('div');
-            emptyDay.className = 'day-box empty bg-gray-50';
-            return emptyDay;
-        }
-
-        function createDayBox(day, dateString, tradesCount, dayResult, isDisabled, isSaturday, isSunday) {
-            const dayEl = document.createElement('div');
-            dayEl.className = 'day-box bg-white p-1 transition-all';
-            dayEl.dataset.date = dateString;
-            
-            if (isDisabled) {
-                dayEl.classList.add('disabled');
-                if (isSaturday) dayEl.classList.add('saturday'); 
-                if (isSunday) dayEl.classList.add('sunday');
-            } else {
-                dayEl.classList.add('cursor-pointer');
-                dayEl.addEventListener('click', () => openModal(dateString));
-            }
-
-            dayEl.innerHTML = `
-                <span class="absolute top-2 left-2 text-xs font-bold text-gray-800">${day}</span>
-                ${tradesCount > 0 ? `<div class="value-box ${dayResult >= 0 ? '' : 'loss'}">$ ${Math.abs(dayResult).toFixed(2)}</div>` : ''}
-            `;
-            
-            if (tradesCount > 0) dayEl.classList.add('has-trade');
-            return dayEl;
-        }
-
-        // Atualiza o resumo no header e na sidebar
-        function updateHeaderSummary(monthTrades) {
-            const totalResult = monthTrades.reduce((acc, t) => acc + parseFloat(t.amount), 0);
-            const winningTrades = monthTrades.filter(t => parseFloat(t.amount) > 0).length;
-            const total = monthTrades.length;
-
-            els.headerNetResult.textContent = `$ ${totalResult.toFixed(2)}`;
-            els.headerNetResult.className = totalResult >= 0 ? 'text-xl font-bold text-green-600' : 'text-xl font-bold text-red-600';
-
-            const winRate = total > 0 ? (winningTrades / total) * 100 : 0;
-            els.headerWinRate.textContent = `${winRate.toFixed(0)}%`;
-            
-            // ATUALIZA O "DESEMPENHO (MÊS)" da sidebar
-            els.contaValor.textContent = `$ ${totalResult.toFixed(2)}`;
-            els.contaValor.className = totalResult >= 0 ? 'text-3xl font-bold text-green-400' : 'text-3xl font-bold text-red-400';
-
-            // REMOVIDO: O cálculo do saldo da semana foi movido para 'updatePatrimonioSummary'
-        }
-
-        // Navegação do Calendário
-        document.getElementById('prevMonth').onclick = () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        };
-        document.getElementById('nextMonth').onclick = () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        };
-
-        // --- Lógica do Formulário (Salvar/Editar) ---
         els.tradeForm.onsubmit = async (e) => {
             e.preventDefault();
+            const date = document.getElementById('tradeDate').value;
             const amount = parseFloat(els.tradeAmount.value);
             const contracts = parseInt(els.tradeContracts.value) || 1;
             const tradeTypeInput = document.querySelector('input[name="tradeType"]:checked');
+            const asset = els.tradeAsset.value;
 
-            if (isNaN(amount) || !tradeTypeInput || !els.tradeAsset.value) {
-                console.warn('Preencha todos os campos obrigatórios!'); 
+            if (isNaN(amount) || !tradeTypeInput || !asset) {
+                console.warn('Preencha todos os campos obrigatórios!');
                 return;
             }
 
             const tradeData = {
                 userId: userId,
-                date: currentEditingDate,
+                date: date,
                 amount: amount,
                 contracts: contracts,
-                asset: els.tradeAsset.value,
+                asset: asset,
                 type: tradeTypeInput.value,
-                notes: els.tradeNotes.value || '',
             };
+
+            els.saveTradeBtn.disabled = true;
+            els.saveTradeBtn.textContent = 'Salvando...';
 
             try {
                 if (currentEditingTradeId) {
                     tradeData.updatedAt = new Date().toISOString();
                     await setDoc(doc(operationsCollection, currentEditingTradeId), tradeData, { merge: true });
                 } else {
-                    tradeData.createdAt = new Date().toISOString();
+                    tradeData.createdAt = new Date().toISOString(); // Timestamp para ordenar trades no mesmo dia
                     await addDoc(operationsCollection, tradeData);
                 }
                 resetForm();
-                openModal(currentEditingDate);
+                openModal(date); // Reabre o modal para o mesmo dia
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                console.warn('Erro ao salvar. Tente novamente.'); 
+            } finally {
+                els.saveTradeBtn.disabled = false;
+                els.saveTradeBtn.textContent = 'Salvar';
             }
         };
 
         els.deleteTrade.onclick = async () => {
-            if (!currentEditingTradeId) return;
+            if (!currentEditingTradeId || !confirm('Tem certeza que deseja excluir esta operação?')) return;
+            
+            const date = document.getElementById('tradeDate').value;
             try {
                 await deleteDoc(doc(operationsCollection, currentEditingTradeId));
                 resetForm();
-                openModal(currentEditingDate);
+                openModal(date); // Reabre o modal
             } catch (error) {
                 console.error("Erro ao deletar:", error);
-                console.warn('Erro ao deletar.'); 
             }
         };
 
-        // --- Lógica do Gráfico de Patrimônio ---
+        // --- Lógica da Aba Patrimônio ---
+        
+        // Filtros do Gráfico de Patrimônio
+        document.querySelectorAll('.equity-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.equity-filter-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-gray-200', 'text-gray-700');
+                updateEquityChart(); // Redesenha o gráfico com o novo filtro
+            });
+        });
+
+        // Desenha/Atualiza o Gráfico de Patrimônio
         function updateEquityChart() {
             const initialEquity = parseFloat(els.initialEquity.value) || 0;
+            const activeFilter = document.querySelector('.equity-filter-btn.active').dataset.filter;
             
-            const today = new Date().toISOString().split('T')[0];
-            
-            const todayDate = new Date();
-            const dayOfWeek = todayDate.getDay();
-            const diff = (dayOfWeek === 0) ? 6 : (dayOfWeek - 1);
-            const weekStart = new Date();
-            weekStart.setDate(todayDate.getDate() - diff);
-            const weekStartStr = weekStart.toISOString().split('T')[0];
+            // Filtra trades baseado no período selecionado
+            const filteredTrades = filterTradesByPeriod(currentTrades, activeFilter);
 
-            const monthStart = new Date();
-            monthStart.setDate(1);
-            const monthStartStr = monthStart.toISOString().split('T')[0];
-
-            const filteredTrades = currentTrades.filter(trade => {
-                if (currentEquityFilter === 'all') return true;
-                if (currentEquityFilter === 'day') return trade.date === today;
-                if (currentEquityFilter === 'week') return trade.date >= weekStartStr;
-                if (currentEquityFilter === 'month') return trade.date >= monthStartStr;
-                return true;
-            });
-
-            const sortedTrades = [...filteredTrades].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const labels = ['Início'];
-            const data = [initialEquity];
-            let currentEquity = initialEquity;
-
+            // Agrupa trades por dia
             const dailyResults = {};
-            sortedTrades.forEach(trade => {
+            filteredTrades.forEach(trade => {
                 const date = trade.date;
                 if (!dailyResults[date]) dailyResults[date] = 0;
                 dailyResults[date] += parseFloat(trade.amount);
             });
+            
+            const sortedDates = Object.keys(dailyResults).sort();
+            const labels = ['Início'];
+            const data = [initialEquity];
+            let currentEquity = initialEquity;
 
-            Object.keys(dailyResults).sort().forEach(date => {
+            sortedDates.forEach(date => {
                 currentEquity += dailyResults[date];
-                labels.push(date);
+                labels.push(date.substring(5)); // Formato MM-DD
                 data.push(currentEquity.toFixed(2));
             });
 
-            const gridColor = 'rgba(0, 0, 0, 0.1)';
-            const labelColor = '#111827'; 
-
+            // Lógica de Cores (Ressalva)
+            const borderColor = (ctx) => {
+                const p0 = ctx.p0.parsed.y;
+                const p1 = ctx.p1.parsed.y;
+                // Se o ponto final (p1) está acima do inicial ($0), mas caiu (p0 > p1), fica vermelho
+                if (p1 >= initialEquity && p0 > p1) return '#dc2626'; // Red-600 (Perdeu valor, mas ainda positivo)
+                // Se está subindo ou se está abaixo de $0 (sempre vermelho)
+                return p1 >= initialEquity ? '#16a34a' : '#dc2626'; // Green-600 / Red-600
+            };
+            
+            // Lógica do Sombreado (Corrigida)
+            const backgroundColor = {
+                above: 'rgba(22, 163, 74, 0.15)',  // Green-600 com 15% opacidade
+                below: 'rgba(220, 38, 38, 0.15)',  // Red-600 com 15% opacidade
+            };
+            
+            // Destrói gráfico antigo
             if (equityChartInstance) equityChartInstance.destroy();
 
+            // Desenha novo gráfico
             equityChartInstance = new Chart(els.equityChart, {
                 type: 'line',
                 data: {
@@ -812,81 +892,63 @@
                     datasets: [{
                         label: 'Patrimônio',
                         data: data,
-                        segment: {
-                            borderColor: (ctx) => {
-                                const y = ctx.p1.raw; 
-                                const y0 = ctx.p0.raw; 
-                                const zero = initialEquity; 
-
-                                if (y < zero) {
-                                    return '#ef4444'; // Vermelho
-                                }
-                                if (y < y0) {
-                                    return '#ef4444'; // Vermelho (perda)
-                                }
-                                return '#22c55e'; // Verde
-                            },
-                        },
                         fill: {
-                            target: { value: initialEquity }, 
-                            above: 'rgba(34, 197, 94, 0.3)', 
-                            below: 'rgba(239, 68, 68, 0.3)'  
+                            target: { value: initialEquity }, // Preenche a partir do eixo $0
+                            above: backgroundColor.above,
+                            below: backgroundColor.below
                         },
-                        borderWidth: 2, 
-                        tension: 0.1
+                        borderColor: borderColor, // Função de segmentação de cor
+                        segment: {
+                            borderColor: borderColor // Aplica a função de cor
+                        },
+                        tension: 0.1,
+                        pointRadius: 2,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, 
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: false,
                             ticks: {
-                                color: labelColor,
-                                callback: function(value) { return '$ ' + value.toFixed(2); }
+                                color: '#1f2937', // text-gray-800
+                                callback: (value) => formatCurrency(value)
                             },
-                            grid: { color: gridColor }
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
                         },
                         x: {
-                            ticks: { color: labelColor },
-                            grid: { color: gridColor }
+                            ticks: { color: '#1f2937' },
+                            grid: { display: false }
                         }
                     },
                     plugins: {
-                        legend: { labels: { color: labelColor } }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Patrimônio: ${formatCurrency(context.parsed.y)}`
+                            }
+                        }
                     }
                 }
             });
         }
-        els.initialEquity.addEventListener('change', updateEquityChart); 
         
-        document.querySelectorAll('#equityChartFilters .filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentEquityFilter = btn.dataset.filter;
-                document.querySelectorAll('#equityChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                updateEquityChart();
-            });
-        });
-
-
-        // --- Função para os CARDS DO PATRIMÔNIO ---
+        // --- Função para os CARDS DO PATRIMÔNIO (Hoje, Semana, Mês, Pico, Gain, Loss) ---
         function updatePatrimonioSummary() {
             const initialEquity = parseFloat(els.initialEquity.value) || 0;
             
             // --- Cálculos baseados na Data ATUAL (Hoje) ---
-            const today = new Date().toISOString().split('T')[0];
-            const todayDate = new Date();
-            const dayOfWeek = todayDate.getDay(); // 0=Dom, 1=Seg
-            const diff = (dayOfWeek === 0) ? 6 : (dayOfWeek - 1); // Para Seg
-            const weekStart = new Date();
-            weekStart.setDate(todayDate.getDate() - diff);
+            const today = new Date(HOJE_STR + 'T12:00:00'); // Fuso horário seguro
+            const dayOfWeek = today.getDay(); // 0=Dom, 1=Seg
+            const diff = (dayOfWeek === 0) ? 6 : (dayOfWeek - 1); // Dias para subtrair para chegar na Seg
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - diff);
             weekStart.setHours(0, 0, 0, 0);
             const weekStartStr = weekStart.toISOString().split('T')[0];
 
             // --- Cálculos baseados no Mês VISTO (currentDate) ---
-            // (Usado para os cards "Lucro Mês", "Maior Gain (Mês)", "Maior Loss (Mês)")
             const viewedYear = currentDate.getFullYear();
             const viewedMonth = currentDate.getMonth();
             const viewedMonthStart = new Date(viewedYear, viewedMonth, 1);
@@ -895,20 +957,19 @@
             const viewedMonthEndStr = viewedMonthEnd.toISOString().split('T')[0];
 
             let todayBal = 0, weekBal = 0, monthBal = 0;
-            let biggestGain = 0, biggestLoss = 0; // Para os novos cards
+            let biggestGain = 0, biggestLoss = 0; // Para os novos cards (trades individuais)
             
             let maxEquity = initialEquity; // Para "Pico"
             let currentEquity = initialEquity;
 
             const dailyResults = {};
-            // Filtra trades GERAIS para a curva de patrimônio
             currentTrades.forEach(trade => {
                 const date = trade.date;
                 if (!dailyResults[date]) dailyResults[date] = 0;
                 dailyResults[date] += parseFloat(trade.amount);
             });
 
-            // Itera todos os trades para Pico/Vale GERAL
+            // Itera todos os trades GERAIS para Pico/Vale
             Object.keys(dailyResults).sort().forEach(date => {
                 currentEquity += dailyResults[date];
                 if (currentEquity > maxEquity) maxEquity = currentEquity;
@@ -918,16 +979,17 @@
             currentTrades.forEach(trade => {
                 const amount = parseFloat(trade.amount);
                 const date = trade.date;
-                const tradeDate = new Date(date + 'T00:00:00');
-                const tradeDayOfWeek = tradeDate.getDay();
+                // Comparação de data segura
+                const tradeDate = new Date(date + 'T12:00:00');
+                const tradeDayOfWeek = tradeDate.getDay(); // 0=Dom, 6=Sab
 
-                if (date === today) {
+                if (date === HOJE_STR) {
                     todayBal += amount;
                 }
 
-                // Soma semana e mês (apenas dias operáveis)
-                if(tradeDayOfWeek !== 0 && tradeDayOfWeek !== 6) { 
-                    if (tradeDate >= weekStart) { // Compara com data de início da semana ATUAL
+                // Soma semana e mês (apenas dias operáveis - NÃO é Sábado)
+                if(tradeDayOfWeek !== 6) { 
+                    if (date >= weekStartStr) { // Compara com data de início da semana ATUAL
                         weekBal += amount;
                     }
                     if (date >= viewedMonthStartStr && date <= viewedMonthEndStr) { // Compara com mês VISTO
@@ -945,295 +1007,251 @@
             // --- Atualiza DOM ---
             
             // Cards do Topo (Hoje, Semana, Mês)
-            els.patrimonioToday.textContent = `$ ${todayBal.toFixed(2)}`;
+            els.patrimonioToday.textContent = formatCurrency(todayBal);
             els.patrimonioToday.className = todayBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
 
-            els.patrimonioWeek.textContent = `$ ${weekBal.toFixed(2)}`;
+            els.patrimonioWeek.textContent = formatCurrency(weekBal);
             els.patrimonioWeek.className = weekBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
 
-            els.patrimonioMonth.textContent = `$ ${monthBal.toFixed(2)}`;
+            els.patrimonioMonth.textContent = formatCurrency(monthBal);
             els.patrimonioMonth.className = monthBal >= 0 ? 'text-2xl font-black text-green-600' : 'text-2xl font-black text-red-600';
             
-            // Sidebar (Semana Atual) - REQUISIÇÃO 1
-            els.sidebarWeekBalance.textContent = `$ ${weekBal.toFixed(2)}`;
+            // Sidebar (Semana Atual)
+            els.sidebarWeekBalance.textContent = formatCurrency(weekBal);
             els.sidebarWeekBalance.className = weekBal >= 0 ? 'text-xl font-bold text-green-400' : 'text-xl font-bold text-red-400';
 
-            // Cards de Baixo (Pico, Gain, Loss) - REQUISIÇÃO 2
-            els.patrimonioBiggestGain.textContent = `$ ${maxEquity.toFixed(2)}`;
-            
-            els.patrimonioMonthGain.textContent = `$ ${biggestGain.toFixed(2)}`;
-            els.patrimonioMonthLoss.textContent = `$ ${biggestLoss.toFixed(2)}`;
+            // Cards de Baixo (Pico, Gain, Loss)
+            els.patrimonioBiggestGain.textContent = formatCurrency(maxEquity);
+            els.patrimonioMonthGain.textContent = formatCurrency(biggestGain);
+            els.patrimonioMonthLoss.textContent = formatCurrency(biggestLoss);
         }
 
 
         // --- Lógica de Análise ---
-        function updateAnalysis() {
-            const today = new Date().toISOString().split('T')[0];
-            
-            const todayDate = new Date();
-            const dayOfWeek = todayDate.getDay();
-            const diff = (dayOfWeek === 0) ? 6 : (dayOfWeek - 1);
-            const weekStart = new Date();
-            weekStart.setDate(todayDate.getDate() - diff);
-            const weekStartStr = weekStart.toISOString().split('T')[0];
-            
-            const monthStart = new Date();
-            monthStart.setDate(1);
-            const monthStartStr = monthStart.toISOString().split('T')[0];
 
-            const filteredTrades = currentTrades.filter(trade => {
-                if (currentAnalysisFilter === 'all') return true;
-                if (currentAnalysisFilter === 'day') return trade.date === today;
-                
-                const tradeDate = new Date(trade.date + 'T00:00:00');
-                const tradeDayOfWeek = tradeDate.getDay();
-                if(tradeDayOfWeek === 0 || tradeDayOfWeek === 6) return false; // Ignora Sáb/Dom
-
-                if (currentAnalysisFilter === 'week') return trade.date >= weekStartStr;
-                if (currentAnalysisFilter === 'month') return trade.date >= monthStartStr;
-                return true;
-            });
-
-            els.analysisByAsset.innerHTML = '';
-            els.analysisByType.innerHTML = '';
-            els.detailedAnalysis.innerHTML = ''; 
-            
-            const analysis = {
-                byAsset: {},
-                byType: {}
-            };
-            
-            filteredTrades.forEach(trade => {
-                const amount = parseFloat(trade.amount);
-                const asset = trade.asset || 'N/A';
-                const type = trade.type || 'N/A';
-                const contracts = parseInt(trade.contracts) || 1;
-
-                if (!analysis.byAsset[asset]) {
-                    analysis.byAsset[asset] = {
-                        total: 0,
-                        count: 0,
-                        buy: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 },
-                        sell: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 }
-                    };
-                }
-                if (!analysis.byType[type]) {
-                    analysis.byType[type] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
-                }
-
-                if(type !== 'N/A') {
-                    analysis.byType[type].total += amount;
-                    analysis.byType[type].count++;
-                    analysis.byType[type].contracts += contracts;
-                    if (amount > 0) analysis.byType[type].wins++;
-                    if (amount < 0) analysis.byType[type].losses++;
-                }
-
-                if(asset !== 'N/A') {
-                    analysis.byAsset[asset].total += amount;
-                    analysis.byAsset[asset].count++;
-                }
-
-                const detailType = (type === 'Buy') ? 'buy' : (type === 'Sell' ? 'sell' : null);
-                
-                if (asset !== 'N/A' && detailType) {
-                    analysis.byAsset[asset][detailType].total += amount;
-                    analysis.byAsset[asset][detailType].count++;
-                    analysis.byAsset[asset][detailType].contracts += contracts;
-                    if (amount > 0) analysis.byAsset[asset][detailType].wins++;
-                    if (amount < 0) analysis.byAsset[asset][detailType].losses++;
-                }
-            });
-
-            // --- 2. Renderização ---
-
-            const renderAnalysisCard = (label, data) => {
-                const totalColor = data.total >= 0 ? 'text-green-600' : 'text-red-600'; 
-                
-                const totalWins = (data.wins !== undefined) ? data.wins : data.buy.wins + data.sell.wins;
-                const totalLosses = (data.losses !== undefined) ? data.losses : data.buy.losses + data.sell.losses;
-                const totalCount = totalWins + totalLosses;
-                const totalContracts = (data.contracts !== undefined) ? data.contracts : data.buy.contracts + data.sell.contracts;
-                
-                const winRate = totalCount > 0 ? ((totalWins / totalCount) * 100) : 0;
-                const winDegrees = (winRate / 100) * 360;
-
-                return `
-                    <div class="p-4 bg-gray-50 rounded-2xl shadow-lg flex items-center gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="donut-chart" style="--wins: ${winDegrees.toFixed(0)}deg">
-                                <div class="donut-chart-text ${winRate >= 50 ? 'text-green-600' : 'text-red-600'}">
-                                    ${winRate.toFixed(0)}<span class="text-xs">%</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-grow">
-                            <h4 class="font-semibold text-lg text-gray-900">${label}</h4>
-                            <div class="flex justify-between items-center mt-1">
-                                <span class="font-bold text-xl ${totalColor}">$ ${data.total.toFixed(2)}</span>
-                                <span class="text-xs text-gray-500">${totalContracts} Contratos</span>
-                            </div>
-                            <div class="mt-2 space-y-1 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">
-                                        <i class="fas fa-arrow-up text-green-500 mr-1"></i> Winners:
-                                    </span>
-                                    <span class="font-semibold text-gray-900">${totalWins}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">
-                                        <i class="fas fa-arrow-down text-red-500 mr-1"></i> Losers:
-                                    </span>
-                                    <span class="font-semibold text-gray-900">${totalLosses}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            };
-            
-            const renderDetailRow = (label, data) => {
-                if (data.count === 0) {
-                    return `
-                        <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-                            <span class="font-semibold text-gray-900">${label}</span>
-                            <span class="text-xs text-gray-400">Nenhum trade</span>
-                        </div>
-                    `;
-                }
-                const totalColor = data.total >= 0 ? 'text-green-600' : 'text-red-600';
-                const winRate = (data.wins / data.count * 100).toFixed(0);
-                return `
-                    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
-                        <div>
-                            <span class="font-semibold text-gray-900">${label}</span>
-                            <p class="text-xs text-gray-500">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
-                        </div>
-                        <span class="font-bold ${totalColor}">$ ${data.total.toFixed(2)}</span>
-                    </div>
-                `;
-            };
-
-            if (Object.keys(analysis.byAsset).length === 0 && filteredTrades.length === 0) {
-                 els.analysisByAsset.innerHTML = `<p class="text-gray-500 text-center col-span-full">Nenhum dado para este período.</p>`;
-            } else {
-                Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
-                    els.analysisByAsset.innerHTML += renderAnalysisCard(asset, data);
-                });
-            }
-
-            if (Object.keys(analysis.byType).length === 0 && filteredTrades.length === 0) {
-                 els.analysisByType.innerHTML = `<p class="text-gray-500 text-center col-span-full">Nenhum dado para este período.</p>`;
-            } else {
-                Object.entries(analysis.byType).sort((a,b) => b[1].total - a[1].total).forEach(([type, data]) => {
-                    els.analysisByType.innerHTML += renderAnalysisCard(type, data);
-                });
-            }
-            
-            if (filteredTrades.length > 0 && Object.keys(analysis.byAsset).length > 0) {
-                Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
-                    els.detailedAnalysis.innerHTML += `
-                        <div class="p-4 bg-gray-100 rounded-lg shadow-sm mb-4">
-                            <h4 class="text-lg font-semibold mb-3 border-b border-gray-200 pb-2 text-gray-900">${asset}</h4>
-                            <div class="space-y-2">
-                                ${renderDetailRow('Buy', data.buy)}
-                                ${renderDetailRow('Sell', data.sell)}
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                els.detailedAnalysis.innerHTML = `<p class="text-gray-500 text-center">Nenhum dado para este período.</pa>`;
-            }
-        }
-
-
-        // --- Lógica de Abas (Sidebar) ---
-        document.querySelectorAll('.sidebar-btn').forEach(btn => {
+        // Filtros da Aba Análise
+        document.querySelectorAll('.analysis-filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const tab = btn.dataset.tab;
-
-                document.querySelectorAll('.sidebar-btn').forEach(b => {
-                    b.classList.remove('active', 'text-white');
-                    b.classList.add('text-gray-400', 'hover:bg-gray-800');
+                document.querySelectorAll('.analysis-filter-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-700');
                 });
-                btn.classList.add('active', 'text-white');
-                btn.classList.remove('text-gray-400', 'hover:bg-gray-800');
-
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-                document.getElementById(tab).classList.remove('hidden');
-
-                els.pageTitle.textContent = pageTitles[tab] || "Dashboard";
-                els.pageTitle.nextElementSibling.textContent = pageSubtitles[tab] || "";
-
-                if (tab === 'patrimonio') {
-                    currentEquityFilter = 'all';
-                    document.querySelectorAll('#equityChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelector('#equityChartFilters .filter-btn[data-filter="all"]').classList.add('active');
-                    updateEquityChart();
-                    updatePatrimonioSummary(); 
-                }
-                if (tab === 'analise') {
-                    currentAnalysisFilter = 'all';
-                    document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelector('#analysisChartFilters .filter-btn[data-filter="all"]').classList.add('active');
-                    updateAnalysis();
-                }
-
-                if (window.innerWidth < 1024) {
-                    closeMenu();
-                }
-            });
-        });
-
-        // --- Lógica: Filtro de Análise ---
-        document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentAnalysisFilter = btn.dataset.filter;
-                document.querySelectorAll('#analysisChartFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                btn.classList.remove('bg-gray-200', 'text-gray-700');
                 updateAnalysis();
             });
         });
+        
+        // Função Central de Filtro de Período
+        function filterTradesByPeriod(trades, filter) {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            
+            // Início da Semana (Seg)
+            const dayOfWeek = now.getDay(); // 0=Dom, 1=Seg
+            const diff = (dayOfWeek === 0) ? 6 : (dayOfWeek - 1); // Dias para subtrair para chegar na Seg
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - diff);
+            const weekStartStr = weekStart.toISOString().split('T')[0];
 
-        // --- Inicialização Firebase ---
-        try {
+            // Início do Mês
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+
+            switch (filter) {
+                case 'dia':
+                    return trades.filter(t => t.date === todayStr);
+                case 'semana':
+                    return trades.filter(t => t.date >= weekStartStr);
+                case 'mes':
+                    return trades.filter(t => t.date >= monthStartStr);
+                case 'geral':
+                default:
+                    return trades;
+            }
+        }
+        
+        // Cria um card de análise (com gráfico donut)
+        function createAnalysisCard(label, stats) {
+            const { total, wins, losses, count, contracts } = stats;
+            const winRate = count > 0 ? (wins / count) * 100 : 0;
+            const lossRate = count > 0 ? (losses / count) * 100 : 0;
+            const totalColor = total >= 0 ? 'text-green-600' : 'text-red-600';
+            
+            // Gradiente para o gráfico donut
+            const conicGradient = `conic-gradient(#dc2626 0% ${lossRate}%, #16a34a ${lossRate}% 100%)`;
+
+            return `
+                <div class="bg-white rounded-2xl shadow-lg p-4 flex items-center gap-4">
+                    <div class="donut-chart" style="background: ${conicGradient};">
+                        <div class="absolute inset-2 bg-white rounded-full"></div>
+                        <div class="center-text">
+                            <span class="percent">${winRate.toFixed(0)}<span class="text-base">%</span></span>
+                            <span class="label">WINRATE</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-lg text-gray-800">${label}</h4>
+                        <p class="font-bold text-xl ${totalColor}">${formatCurrency(total)}</p>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <span class="text-green-600 font-semibold">${wins} Winners</span> | 
+                            <span class="text-red-600 font-semibold">${losses} Losers</span> | 
+                            <span>${contracts} Contratos</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Cria card de análise detalhada (Buy vs Sell)
+        function createDetailedCard(asset, assetStats) {
+            const { Buy, Sell } = assetStats;
+            const totalColor = (Buy.total + Sell.total) >= 0 ? 'text-green-600' : 'text-red-600';
+            
+            const renderStatRow = (type, data) => {
+                const color = type === 'Buy' ? 'green' : 'red';
+                const winRate = data.count > 0 ? ((data.wins / data.count) * 100).toFixed(0) : 0;
+                return `
+                    <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
+                        <div>
+                            <span class="font-bold text-${color}-600">${type.toUpperCase()}</span>
+                            <span class="text-xs text-gray-500 ml-2">(${data.wins}W / ${data.losses}L)</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-${color}-600">${formatCurrency(data.total)}</span>
+                            <p class="text-xs text-gray-500">${winRate}% Win Rate | ${data.contracts} Contratos</p>
+                        </div>
+                    </div>
+                `;
+            };
+
+            return `
+                <div class="bg-white rounded-2xl shadow-lg p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-lg font-bold text-gray-800">${asset}</h4>
+                        <span class="font-bold text-xl ${totalColor}">${formatCurrency(Buy.total + Sell.total)}</span>
+                    </div>
+                    <div class="space-y-2">
+                        ${renderStatRow('Buy', Buy)}
+                        ${renderStatRow('Sell', Sell)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Atualiza a Aba de Análise
+        function updateAnalysis() {
+            const activeFilter = document.querySelector('.analysis-filter-btn.active').dataset.filter;
+            const tradesToAnalyze = filterTradesByPeriod(currentTrades, activeFilter);
+
+            const analysis = { byAsset: {}, byType: {}, detailed: {} };
+
+            tradesToAnalyze.forEach(trade => {
+                const amount = parseFloat(trade.amount);
+                const asset = trade.asset || 'Outro';
+                const type = trade.type || 'Buy';
+                const contracts = parseInt(trade.contracts) || 1;
+                const isWin = amount > 0;
+                const isLoss = amount < 0;
+
+                // Inicializa estruturas
+                if (!analysis.byAsset[asset]) analysis.byAsset[asset] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
+                if (!analysis.byType[type]) analysis.byType[type] = { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 };
+                if (!analysis.detailed[asset]) {
+                    analysis.detailed[asset] = {
+                        Buy: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 },
+                        Sell: { total: 0, wins: 0, losses: 0, count: 0, contracts: 0 }
+                    };
+                }
+
+                // Agrega por Ativo
+                analysis.byAsset[asset].total += amount;
+                analysis.byAsset[asset].count++;
+                analysis.byAsset[asset].contracts += contracts;
+                if (isWin) analysis.byAsset[asset].wins++;
+                if (isLoss) analysis.byAsset[asset].losses++;
+
+                // Agrega por Tipo
+                analysis.byType[type].total += amount;
+                analysis.byType[type].count++;
+                analysis.byType[type].contracts += contracts;
+                if (isWin) analysis.byType[type].wins++;
+                if (isLoss) analysis.byType[type].losses++;
+
+                // Agrega Detalhado (Ativo -> Tipo)
+                analysis.detailed[asset][type].total += amount;
+                analysis.detailed[asset][type].count++;
+                analysis.detailed[asset][type].contracts += contracts;
+                if (isWin) analysis.detailed[asset][type].wins++;
+                if (isLoss) analysis.detailed[asset][type].losses++;
+            });
+
+            // Renderiza HTML
+            els.analysisByAsset.innerHTML = Object.keys(analysis.byAsset).length > 0
+                ? Object.entries(analysis.byAsset).map(([label, stats]) => createAnalysisCard(label, stats)).join('')
+                : '<p class="text-gray-500">Sem dados para este período.</p>';
+            
+            els.analysisByType.innerHTML = Object.keys(analysis.byType).length > 0
+                ? Object.entries(analysis.byType).map(([label, stats]) => createAnalysisCard(label, stats)).join('')
+                : '<p class="text-gray-500">Sem dados para este período.</p>';
+
+            els.detailedAnalysis.innerHTML = Object.keys(analysis.detailed).length > 0
+                ? Object.entries(analysis.detailed).map(([asset, stats]) => createDetailedCard(asset, stats)).join('')
+                : '<p class="text-gray-500">Sem dados para este período.</p>';
+        }
+
+
+        // --- Inicialização do Firebase ---
+        async function initializeAppAndAuth() {
+            console.log('Iniciando Firebase...');
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            getAnalytics(app); 
+            setLogLevel('error'); // Reduz o spam da console
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
+                    console.log('Usuário autenticado:', user.uid);
                     userId = user.uid;
+                    
+                    // Caminho Público (Solução A)
                     const collectionPath = `artifacts/${appId}/public/data/operations`;
                     operationsCollection = collection(db, collectionPath);
                     
+                    // Inicia o listener de dados
                     onSnapshot(query(operationsCollection), (snapshot) => {
+                        console.log(`Dados recebidos: ${snapshot.docs.length} operações.`);
                         currentTrades = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        renderCalendar(); 
-                        updatePatrimonioSummary();
-
-                        if (!document.getElementById('patrimonio').classList.contains('hidden')) updateEquityChart();
-                        if (!document.getElementById('analise').classList.contains('hidden')) updateAnalysis();
+                        
+                        // Atualiza a UI
+                        renderCalendar(); // Renderiza o calendário (que chama updateHeaderSummary e updatePatrimonioSummary)
+                        
+                        // Atualiza abas abertas (se não for a 'diario')
+                        if (!document.getElementById('patrimonio').classList.contains('hidden')) {
+                            updateEquityChart();
+                        }
+                        if (!document.getElementById('analise').classList.contains('hidden')) {
+                            updateAnalysis();
+                        }
                     }, (error) => {
-                         console.error("Erro ao buscar dados (onSnapshot):", error);
+                        console.error("Erro ao buscar dados (onSnapshot):", error);
                     });
 
                 } else {
-                    signInAnonymously(auth).catch(error => {
-                        console.error("Erro no login anônimo:", error);
-                    });
+                    // Tenta login anônimo
+                    console.log('Nenhum usuário logado. Tentando login anônimo...');
+                    try {
+                        await signInAnonymously(auth);
+                        console.log('Login anônimo bem-sucedido.');
+                    } catch (error) {
+                        console.error('Erro no login anônimo:', error);
+                    }
                 }
             });
-        } catch (e) {
-            console.error("Erro ao inicializar o Firebase:", e);
         }
 
-        // Render inicial e ativação de filtros
-        renderCalendar();
-        document.querySelector('.sidebar-btn[data-tab="diario"]').click(); // Clica na primeira aba
+        // --- Ponto de Entrada ---
+        initializeAppAndAuth();
 
     </script>
 </body>
