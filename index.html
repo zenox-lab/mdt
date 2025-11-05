@@ -161,12 +161,13 @@
             <!-- Card Conta (como na referência) -->
             <div class="bg-gray-800/50 dark:bg-gray-800 rounded-2xl p-4 mb-8 text-center space-y-2">
                 <div>
-                    <p class="text-sm text-gray-400">Desempenho Geral</p>
+                    <!-- CORREÇÃO: Texto mais claro -->
+                    <p class="text-sm text-gray-300">Desempenho Geral</p>
                     <p id="contaValor" class="text-3xl font-bold text-white">R$ 0,00</p>
                 </div>
                 <!-- NOVO: Saldo da Semana -->
                 <div class="border-t border-gray-700 pt-2">
-                    <p class="text-sm text-gray-400">Saldo da Semana (Atual)</p>
+                    <p class="text-sm text-gray-300">Saldo da Semana (Atual)</p>
                     <p id="sidebarWeekBalance" class="text-xl font-bold text-white">R$ 0,00</p>
                 </div>
             </div>
@@ -205,6 +206,7 @@
             <!-- Header do Conteúdo (substitui o header antigo) -->
             <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
                 <div>
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <h2 id="pageTitle" class="text-3xl font-bold text-gray-800 dark:text-gray-100">Calendário de Trades</h2>
                     <p class="text-gray-500 dark:text-gray-200">Registre seus ganhos e perdas diárias.</p>
                 </div>
@@ -229,6 +231,7 @@
                 <section id="diario" class="tab-content space-y-6">
                     <div class="flex justify-between items-center">
                         <button id="prevMonth" class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"><i class="fas fa-chevron-left"></i></button>
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <h2 id="currentMonthYear" class="text-2xl font-bold text-gray-800 dark:text-gray-100"></h2>
                         <button id="nextMonth" class="p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"><i class="fas fa-chevron-right"></i></button>
                     </div>
@@ -251,16 +254,17 @@
                     <div class="flex flex-wrap gap-4 items-center justify-between">
                         <!-- Input de Saldo Inicial -->
                         <div class="flex gap-2 items-center">
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <label class="text-sm font-medium dark:text-gray-200">Inicial (R$):</label>
-                            <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 w-32">
+                            <input type="number" id="initialEquity" value="0" class="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-4 focus:ring-blue-500/50 w-32 dark:text-gray-100">
                         </div>
                         
                         <!-- NOVO: Filtros de Período do Gráfico -->
                         <nav id="equityChartFilters" class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
-                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Geral</button>
-                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Mês</button>
-                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Semana</button>
-                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Dia</button>
+                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Geral</button>
+                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Mês</button>
+                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Semana</button>
+                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Dia</button>
                         </nav>
                     </div>
                     
@@ -272,14 +276,17 @@
                     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
                             <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Hoje</p>
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <p id="patrimonioToday" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
                             <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Semana</p>
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <p id="patrimonioWeek" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                         <div class="p-4 bg-gray-50 dark:bg-gray-700/60 rounded-2xl shadow-lg text-center">
                             <p class="text-sm opacity-70 mb-2 dark:text-gray-300">Lucro Mês</p>
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <p id="patrimonioMonth" class="text-2xl font-black text-gray-700 dark:text-gray-100">R$ 0,00</p>
                         </div>
                     </div>
@@ -300,25 +307,28 @@
                     <!-- FILTROS DE ANÁLISE -->
                     <div class="flex justify-center">
                         <nav id="analysisChartFilters" class="flex bg-gray-100 dark:bg-gray-700/60 rounded-xl shadow-lg overflow-hidden p-1">
-                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Geral</button>
-                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Mês</button>
-                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Semana</button>
-                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-100 rounded-lg transition-all">Dia</button>
+                            <button data-filter="all" class="filter-btn active px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Geral</button>
+                            <button data-filter="month" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Mês</button>
+                            <button data-filter="week" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Semana</button>
+                            <button data-filter="day" class="filter-btn px-5 py-2 font-semibold text-gray-600 dark:text-gray-200 rounded-lg transition-all">Dia</button>
                         </nav>
                     </div>
 
                     <!-- Títulos fora dos grids e grids para os novos cards -->
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <h3 class="text-xl font-bold flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700/50 dark:text-gray-100"><i class="fas fa-coins text-yellow-500"></i> Desempenho por Ativo</h3>
                     <div id="analysisByAsset" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Cards de Ativo serão inseridos aqui pelo JS -->
                     </div>
 
+                    <!-- CORREÇÃO: Texto mais claro -->
                     <h3 class="text-xl font-bold flex items-center gap-2 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700/50 dark:text-gray-100"><i class="fas fa-arrows-alt-h text-purple-500"></i> Desempenho por Tipo (Buy/Sell)</h3>
                     <div id="analysisByType" class="grid md:grid-cols-2 gap-6">
                         <!-- Cards de Tipo serão inseridos aqui pelo JS -->
                     </div>
                     
                     <div class="bg-gray-50 dark:bg-gray-700/60 rounded-2xl p-5 mt-8 shadow-inner">
+                        <!-- CORREÇÃO: Texto mais claro -->
                         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 dark:text-gray-100"><i class="fas fa-search-dollar text-cyan-500"></i> Detalhado por Ativo</h3>
                         <div id="detailedAnalysis" class="space-y-4">
                             <!-- Análise detalhada (como estava) -->
@@ -330,7 +340,7 @@
         </main>
     </div>
 
-    <!-- MODAL (Sem alterações, exceto o fundo para dark mode) -->
+    <!-- MODAL (Com correção de texto para dark mode) -->
     <div id="tradeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg p-8 relative transform scale-95 transition-all duration-300" id="modalContent">
             <button id="closeModal" class="absolute top-4 right-6 text-3xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">&times;</button>
@@ -438,17 +448,6 @@
             saveTradeBtn: document.getElementById('saveTradeBtn'),
             dailyTradesList: document.getElementById('dailyTradesList'),
             formTitle: document.getElementById('formTitle'),
-            
-            // Objetos Falsos (para manter a lógica sem erros)
-            netResult: document.getElementById('headerNetResult'), 
-            winRate: document.getElementById('headerWinRate'),
-            totalTrades: { textContent: '' }, 
-            avgProfitLoss: { textContent: '' }, 
-            todayBalance: { textContent: '', className: '' }, 
-            weekBalance: { textContent: '', className: '' }, 
-            monthBalance: { textContent: '', className: '' }, 
-            biggestGain: { textContent: '' }, 
-            biggestLoss: { textContent: '' }, 
 
             // Patrimônio
             initialEquity: document.getElementById('initialEquity'),
@@ -509,6 +508,7 @@
                         <div class="p-3 mx-2 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition" data-trade-id="${trade.id}">
                             <div>
                                 <span class="font-bold ${amountColor}">R$ ${amount.toFixed(2)}</span>
+                                <!-- CORREÇÃO: Texto mais claro -->
                                 <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">(${contracts}c, ${assetLabel}/${typeLabel})</span>
                             </div>
                             <i class="fas fa-pencil-alt text-xs text-gray-400"></i>
@@ -572,7 +572,8 @@
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             els.currentMonthYear.textContent = `${monthNames[month]} ${year}`;
-            const firstDay = new Date(year, month, 1).getDay();
+            
+            const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 (Dom) - 6 (Sáb)
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
             const monthTrades = currentTrades.filter(t => {
@@ -583,73 +584,44 @@
             const tradesByDay = {};
             monthTrades.forEach(trade => {
                 const day = parseInt(trade.date.split('-')[2]);
-                if (!tradesByDay[day]) tradesByDay[day] = [];
-                tradesByDay[day].push(parseFloat(trade.amount));
+                if (!tradesByDay[day]) tradesByDay[day] = {};
+                if (!tradesByDay[day].trades) tradesByDay[day].trades = [];
+                tradesByDay[day].trades.push(parseFloat(trade.amount));
             });
 
-            // MUDANÇA: Lógica para Saldo da Semana
             let weekTrades = [];
-            let dayCounter = 0;
 
-            // Dias em branco (Respeitando a grade de 8 colunas)
-            for (let i = 0; i < firstDay; i++) {
-                const emptyDay = document.createElement('div');
-                emptyDay.className = 'day-box empty bg-gray-50 dark:bg-gray-800/50';
-                els.calendarGrid.appendChild(emptyDay);
-                dayCounter++;
+            // 1. Dias em branco no início
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                els.calendarGrid.appendChild(createEmptyDayBox());
             }
 
-            // Dias do mês
+            // 2. Dias do mês
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let dayTrades = tradesByDay[day] || [];
-                let dayResult = dayTrades.reduce((acc, val) => acc + val, 0);
+                let dayData = tradesByDay[day] || { trades: [] };
+                let dayResult = dayData.trades.reduce((acc, val) => acc + val, 0);
 
                 // Acumula trades da semana
-                weekTrades.push(...dayTrades);
+                weekTrades.push(...dayData.trades);
 
-                const dayEl = document.createElement('div');
-                dayEl.className = 'day-box bg-white dark:bg-gray-800 p-1 cursor-pointer transition-all';
-                dayEl.dataset.date = dateString;
-                dayEl.innerHTML = `
-                    <span class="absolute top-2 left-2 text-xs font-bold text-gray-500 dark:text-gray-300">${day}</span>
-                    ${dayTrades.length > 0 ? `<div class="value-box ${dayResult >= 0 ? '' : 'loss'}">R$ ${Math.abs(dayResult).toFixed(2)}</div>` : ''}
-                `;
-                dayEl.addEventListener('click', () => openModal(dateString));
-                if (dayTrades.length > 0) dayEl.classList.add('has-trade');
+                const dayEl = createDayBox(day, dateString, dayData.trades.length, dayResult);
                 els.calendarGrid.appendChild(dayEl);
-                dayCounter++;
 
-                // Se for Sábado (dia 6 do week index, que agora é 0-indexed para 7 colunas)
-                // ou o último dia do mês
-                const isSaturday = (firstDay + day - 1) % 7 === 6;
-                const isLastDay = day === daysInMonth;
+                const currentDayOfWeek = (firstDayOfWeek + day - 1) % 7;
 
-                // Adiciona o resumo da semana
-                if (isSaturday || isLastDay) {
-                    const weekResult = weekTrades.reduce((acc, val) => acc + val, 0);
-                    const summaryBox = document.createElement('div');
-                    summaryBox.className = 'week-summary-box';
+                // Se for Sábado (6) ou o último dia do mês, fechar a semana
+                if (currentDayOfWeek === 6 || day === daysInMonth) {
+                    // Adiciona o resumo da semana
+                    els.calendarGrid.appendChild(createWeekSummaryBox(weekTrades));
+                    weekTrades = []; // Reseta para a próxima semana
                     
-                    const resultColor = weekResult >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                    summaryBox.innerHTML = `
-                        <span class="text-xs font-bold text-gray-500 dark:text-gray-300">Total</span>
-                        <span class="font-black text-lg ${resultColor}">R$ ${weekResult.toFixed(2)}</span>
-                    `;
-                    els.calendarGrid.appendChild(summaryBox);
-                    
-                    // Reseta para a próxima semana
-                    weekTrades = [];
-                }
-
-                // Se for o último dia E não for sábado, preenche o resto da linha
-                if (isLastDay && !isSaturday) {
-                     // Quantos dias faltam para o sábado (coluna 6)
-                    const remainingDays = 6 - ((firstDay + day - 1) % 7);
-                    for (let i = 0; i < remainingDays; i++) {
-                        const emptyDay = document.createElement('div');
-                        emptyDay.className = 'day-box empty bg-gray-50 dark:bg-gray-800/50';
-                        els.calendarGrid.appendChild(emptyDay);
+                    // CORREÇÃO: Se for o último dia E não for sábado, preenche o resto
+                    if (day === daysInMonth && currentDayOfWeek !== 6) {
+                        const remainingEmptyDays = 6 - currentDayOfWeek;
+                        for (let i = 0; i < remainingEmptyDays; i++) {
+                             els.calendarGrid.appendChild(createEmptyDayBox());
+                        }
                     }
                 }
             }
@@ -658,6 +630,39 @@
             updatePatrimonioSummary();
         }
 
+        function createEmptyDayBox() {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'day-box empty bg-gray-50 dark:bg-gray-800/50';
+            return emptyDay;
+        }
+
+        function createDayBox(day, dateString, tradesCount, dayResult) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'day-box bg-white dark:bg-gray-800 p-1 cursor-pointer transition-all';
+            dayEl.dataset.date = dateString;
+            // CORREÇÃO: Texto mais claro
+            dayEl.innerHTML = `
+                <span class="absolute top-2 left-2 text-xs font-bold text-gray-500 dark:text-gray-300">${day}</span>
+                ${tradesCount > 0 ? `<div class="value-box ${dayResult >= 0 ? '' : 'loss'}">R$ ${Math.abs(dayResult).toFixed(2)}</div>` : ''}
+            `;
+            dayEl.addEventListener('click', () => openModal(dateString));
+            if (tradesCount > 0) dayEl.classList.add('has-trade');
+            return dayEl;
+        }
+
+        function createWeekSummaryBox(trades) {
+            const weekResult = trades.reduce((acc, val) => acc + val, 0);
+            const summaryBox = document.createElement('div');
+            summaryBox.className = 'week-summary-box';
+            
+            const resultColor = weekResult >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+            // CORREÇÃO: Texto mais claro
+            summaryBox.innerHTML = `
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-300">Total</span>
+                <span class="font-black text-lg ${resultColor}">R$ ${weekResult.toFixed(2)}</span>
+            `;
+            return summaryBox;
+        }
 
         // Atualiza o resumo no header e na sidebar
         function updateHeaderSummary(monthTrades) {
@@ -792,7 +797,7 @@
 
             const isDarkMode = document.documentElement.classList.contains('dark');
             const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const labelColor = isDarkMode ? '#f3f4f6' : '#111827';
+            const labelColor = isDarkMode ? '#f3f4f6' : '#111827'; // CORREÇÃO: Texto mais claro
 
             if (equityChartInstance) equityChartInstance.destroy();
 
@@ -819,10 +824,11 @@
 
                             const ratio = Math.max(0, Math.min(1, zeroY / chartArea.bottom));
                             
-                            gradient.addColorStop(0, '#ef4444'); // Vermelho
-                            gradient.addColorStop(ratio, '#ef4444');
-                            gradient.addColorStop(ratio, '#22c55e'); // Verde
-                            gradient.addColorStop(1, '#22c55e');
+                            // CORREÇÃO: Cores invertidas
+                            gradient.addColorStop(0, '#22c55e'); // Verde (Topo)
+                            gradient.addColorStop(ratio, '#22c55e');
+                            gradient.addColorStop(ratio, '#ef4444'); // Vermelho (Baixo)
+                            gradient.addColorStop(1, '#ef4444');
                             return gradient;
                         },
                         backgroundColor: (ctx) => {
@@ -840,11 +846,11 @@
 
                             const ratio = Math.max(0, Math.min(1, zeroY / chartArea.bottom));
 
-                            // CORREÇÃO: Cores mais fortes (verde e vermelho)
-                            gradient.addColorStop(0, 'rgba(239, 68, 68, 0.3)'); // Vermelho mais forte
-                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.3)');
-                            gradient.addColorStop(ratio, 'rgba(34, 197, 94, 0.3)'); // Verde mais forte
-                            gradient.addColorStop(1, 'rgba(34, 197, 94, 0.3)'); 
+                            // CORREÇÃO: Cores invertidas
+                            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)'); // Verde (Topo)
+                            gradient.addColorStop(ratio, 'rgba(34, 197, 94, 0.3)');
+                            gradient.addColorStop(ratio, 'rgba(239, 68, 68, 0.3)'); // Vermelho (Baixo)
+                            gradient.addColorStop(1, 'rgba(239, 68, 68, 0.3)'); 
                             return gradient;
                         },
                         fill: true,
@@ -1027,19 +1033,23 @@
                         </div>
                         
                         <div class="flex-grow">
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <h4 class="font-semibold text-lg dark:text-gray-100">${label}</h4>
                             <div class="flex justify-between items-center mt-1">
                                 <span class="font-bold text-xl ${totalColor}">R$ ${data.total.toFixed(2)}</span>
+                                <!-- CORREÇÃO: Texto mais claro -->
                                 <span class="text-xs text-gray-500 dark:text-gray-300">${totalContracts} Contratos</span>
                             </div>
                             <div class="mt-2 space-y-1 text-sm">
                                 <div class="flex justify-between">
+                                    <!-- CORREÇÃO: Texto mais claro -->
                                     <span class="text-gray-600 dark:text-gray-200">
                                         <i class="fas fa-arrow-up text-green-500 mr-1"></i> Winners:
                                     </span>
                                     <span class="font-semibold dark:text-gray-100">${totalWins}</span>
                                 </div>
                                 <div class="flex justify-between">
+                                    <!-- CORREÇÃO: Texto mais claro -->
                                     <span class="text-gray-600 dark:text-gray-200">
                                         <i class="fas fa-arrow-down text-red-500 mr-1"></i> Losers:
                                     </span>
@@ -1066,6 +1076,7 @@
                     <div class="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700/50 rounded">
                         <div>
                             <span class="font-semibold dark:text-gray-100">${label}</span>
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <p class="text-xs text-gray-500 dark:text-gray-400">${data.wins} W / ${data.losses} L (${winRate}%) | ${data.contracts} Contratos</p>
                         </div>
                         <span class="font-bold ${totalColor}">R$ ${data.total.toFixed(2)}</span>
@@ -1093,6 +1104,7 @@
                 Object.entries(analysis.byAsset).sort((a,b) => b[1].total - a[1].total).forEach(([asset, data]) => {
                     els.detailedAnalysis.innerHTML += `
                         <div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg shadow-sm mb-4">
+                            <!-- CORREÇÃO: Texto mais claro -->
                             <h4 class="text-lg font-semibold mb-3 border-b border-gray-200 dark:border-gray-700 pb-2 dark:text-gray-100">${asset}</h4>
                             <div class="space-y-2">
                                 ${renderDetailRow('Buy', data.buy)}
