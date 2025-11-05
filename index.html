@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diário de Trades</title>
+    <title>Meu Diário de Trades</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -235,11 +235,11 @@
                             <p id="patrimonioToday" class="text-2xl font-black text-gray-800">$ 0,00</p>
                         </div>
                         <div class="p-4 bg-white rounded-2xl shadow-lg text-center">
-                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Semana (Seg-Sex)</p>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Semana (Seg-Dom)</p>
                             <p id="patrimonioWeek" class="text-2xl font-black text-gray-800">$ 0,00</p>
                         </div>
                         <div class="p-4 bg-white rounded-2xl shadow-lg text-center">
-                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Mês (Seg-Sex)</p>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Lucro Mês (Seg-Dom)</p>
                             <p id="patrimonioMonth" class="text-2xl font-black text-gray-800">$ 0,00</p>
                         </div>
                     </div>
@@ -261,7 +261,8 @@
                         
                         <!-- Canvas do Gráfico -->
                         <div class="h-64 md:h-96">
-                            <canvas id="equityChart"></canvas>
+                            <!-- O elemento <canvas> em si -->
+                            <canvas id="equityChartEl"></canvas>
                         </div>
                     </div>
                     
@@ -461,7 +462,7 @@
             patrimonioWeek: document.getElementById('patrimonioWeek'),
             patrimonioMonth: document.getElementById('patrimonioMonth'),
             initialEquity: document.getElementById('initialEquity'),
-            equityChart: document.getElementById('equityChart').getContext('2d'),
+            equityChartEl: document.getElementById('equityChartEl'), // CORRIGIDO
             patrimonioBiggestGain: document.getElementById('patrimonioBiggestGain'),
             patrimonioMonthGain: document.getElementById('patrimonioMonthGain'),
             patrimonioMonthLoss: document.getElementById('patrimonioMonthLoss'),
@@ -644,8 +645,8 @@
             
             // Se o mês não terminou no Domingo (índice 6)
             if (lastDayOfWeek < 6) {
-                // Preenche os dias vazios restantes (ex: se terminou na Quarta, preenche Qui, Sex, Sab, Dom)
-                for (let i = lastDayOfWeek + 1; i <= 6; i++) {
+                // Preenche os dias vazios restantes (ex: se terminou na Quarta, preenche Qui, Sex, Sab)
+                for (let i = lastDayOfWeek + 1; i <= 6; i++) { // Alvo é 6 (Domingo)
                      els.calendarGrid.appendChild(createEmptyDayBox());
                 }
                 // Adiciona a caixa da semana final
@@ -867,8 +868,14 @@
 
             // Lógica de Cores (Ressalva)
             const borderColor = (ctx) => {
+                // CORREÇÃO: Adiciona verificação de segurança para o primeiro ponto
+                if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
+                    return '#16a34a'; // Default green
+                }
+                
                 const p0 = ctx.p0.parsed.y;
                 const p1 = ctx.p1.parsed.y;
+                
                 // Se o ponto final (p1) está acima do inicial ($0), mas caiu (p0 > p1), fica vermelho
                 if (p1 >= initialEquity && p0 > p1) return '#dc2626'; // Red-600 (Perdeu valor, mas ainda positivo)
                 // Se está subindo ou se está abaixo de $0 (sempre vermelho)
@@ -885,7 +892,8 @@
             if (equityChartInstance) equityChartInstance.destroy();
 
             // Desenha novo gráfico
-            equityChartInstance = new Chart(els.equityChart, {
+            // CORREÇÃO: Passa o elemento canvas (els.equityChartEl), não o contexto
+            equityChartInstance = new Chart(els.equityChartEl, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -1256,4 +1264,3 @@
     </script>
 </body>
 </html>
-
